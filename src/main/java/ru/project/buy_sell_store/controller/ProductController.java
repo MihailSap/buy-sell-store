@@ -33,55 +33,55 @@ public class ProductController {
      * Создание нового товара
      */
     @PostMapping("/add")
-    public ResponseEntity<String> create(@Valid @RequestBody ProductDTO productDto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public String create(@Valid @RequestBody ProductDTO productDto) {
         productService.save(productDto);
-        return new ResponseEntity<>("Продукт создан!", HttpStatus.CREATED);
+        return "Продукт создан!";
     }
 
     /**
      * Получение товара по id
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(productService.findById(id), HttpStatus.OK);
+    public ProductDTO findById(@PathVariable("id") Long id) {
+        return productService.findById(id);
     }
 
     /**
      * Обновление товара по id
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable("id") Long id,
+    public String update(@PathVariable("id") Long id,
                                             @Valid @RequestBody ProductDTO productDto) {
         productService.update(id, productDto);
-        return new ResponseEntity<>("Продукт изменен!", HttpStatus.OK);
+        return "Продукт изменен!";
     }
 
     /**
      * Удаление товара по id
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
+    public String delete(@PathVariable("id") Long id) {
         productService.delete(id);
-        return new ResponseEntity<>("Продукт удален!", HttpStatus.OK);
+        return "Продукт удален!";
     }
 
     /**
      * Архивирование товара по id
      */
     @PostMapping("/{id}/archive")
-    public ResponseEntity<String> archive(@PathVariable("id") Long id) {
+    public String archive(@PathVariable("id") Long id) {
         productService.archive(id);
-        return new ResponseEntity<>("Товар добавлен в архив", HttpStatus.OK);
+        return "Товар добавлен в архив";
     }
 
     /**
      * Восстановление товара из архива по id
      */
     @PostMapping("/{id}/restore")
-    public ResponseEntity<String> restore(@PathVariable("id") Long id) {
+    public String restore(@PathVariable("id") Long id) {
         productService.restore(id);
-        return new ResponseEntity<>("Ваш товар вернулся в открытый доступ. " +
-                "Теперь другие пользователи снова могут просматривать и покупать его",
-                HttpStatus.OK);
+        return "Ваш товар вернулся в открытый доступ. " +
+                "Теперь другие пользователи снова могут просматривать и покупать его";
     }
 }
