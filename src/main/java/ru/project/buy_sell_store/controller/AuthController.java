@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.LoginDTO;
-import ru.project.buy_sell_store.dto.UserDTO;
+import ru.project.buy_sell_store.dto.RegisterUserDTO;
 import ru.project.buy_sell_store.service.impl.AuthServiceImpl;
 
 @RestController
@@ -21,9 +21,9 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(@RequestBody UserDTO userDTO) {
-        authService.register(userDTO);
-        return String.format("Пользователь %s зарегистрирован!", userDTO.login());
+    public String register(@RequestBody RegisterUserDTO registerUserDTO) {
+        authService.register(registerUserDTO);
+        return String.format("Пользователь %s зарегистрирован!", registerUserDTO.login());
     }
 
     @PostMapping("/login")

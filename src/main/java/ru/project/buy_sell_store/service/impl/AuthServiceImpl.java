@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.project.buy_sell_store.dto.LoginDTO;
-import ru.project.buy_sell_store.dto.UserDTO;
+import ru.project.buy_sell_store.dto.RegisterUserDTO;
 import ru.project.buy_sell_store.service.AuthService;
 import ru.project.buy_sell_store.service.UserService;
 
@@ -25,8 +25,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(UserDTO userDTO){
-        userService.create(userDTO);
+    public void register(RegisterUserDTO registerUserDTO){
+        userService.create(registerUserDTO);
     }
 
     @Override

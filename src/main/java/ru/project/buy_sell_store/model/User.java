@@ -1,6 +1,7 @@
 package ru.project.buy_sell_store.model;
 
 import jakarta.persistence.*;
+import ru.project.buy_sell_store.enums.Role;
 
 import java.util.Date;
 import java.util.Objects;
@@ -21,12 +22,22 @@ public class User {
 
     private Date birthday;
 
-    public User(long id, String login, String email, String password, Date birthday) {
+    private String city;
+
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    public User(long id, String login, String email, String password, Date birthday, String city, String description, Role role) {
         this.id = id;
         this.login = login;
         this.email = email;
         this.password = password;
+        this.role = role;
         this.birthday = birthday;
+        this.city = city;
+        this.description = description;
     }
 
     public User() {
@@ -65,6 +76,14 @@ public class User {
         this.password = password;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Date getBirthday() {
         return birthday;
     }
@@ -73,18 +92,35 @@ public class User {
         this.birthday = birthDate;
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return id == user.id && Objects.equals(login, user.login) && Objects.equals(email, user.email)
-                && Objects.equals(password, user.password) && Objects.equals(birthday, user.birthday);
+                && Objects.equals(password, user.password) && Objects.equals(birthday, user.birthday)
+                && Objects.equals(city, user.city) && Objects.equals(description, user.description) && role == user.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, email, password, birthday);
+        return Objects.hash(id, login, email, password, birthday, city, description, role);
     }
 
     @Override
@@ -95,6 +131,9 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", birthday=" + birthday +
+                ", city='" + city + '\'' +
+                ", description='" + description + '\'' +
+                ", role=" + role +
                 '}';
     }
 }
