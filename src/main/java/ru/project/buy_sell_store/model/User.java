@@ -6,29 +6,68 @@ import ru.project.buy_sell_store.enums.Role;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * <b>Сущность пользователя</b>
+ * @author SapeginMihail
+ */
 @Entity
 @Table(name = "users")
 public class User {
 
+    /**
+     * <b>id пользователя.</b>
+     * <p>Определяется при создании сущности</p>
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    /**
+     * <b>Логин</b>
+     * <p>Именно по нему пользователь выполняет вход</p>
+     */
     private String login;
 
+    /**
+     * <b>Адрес электронной почты</b>
+     * <p>Определяется пользователем при регистрации</p>
+     */
     private String email;
 
+    /**
+     * <b>Пароль</b>
+     * <p>Определяется пользователем при регистрации. Хранится в зашифрованном виде.</p>
+     */
     private String password;
 
+    /**
+     * <b>Дата рождения</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
     private Date birthday;
 
+    /**
+     * <b>Город проживания</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
     private String city;
 
+    /**
+     * <b>Описание аккаунта</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
     private String description;
 
+    /**
+     * <b>Роль</b>
+     * <p>Определяется пользователем при регистрации. Сохраняется в БД как строка.</p>
+     */
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    /**
+     * Конструктор
+     */
     public User(long id, String login, String email, String password, Date birthday, String city, String description, Role role) {
         this.id = id;
         this.login = login;
@@ -40,74 +79,130 @@ public class User {
         this.description = description;
     }
 
+    /**
+     * Пустой конструктор
+     * Необходим для сущности
+     */
     public User() {
 
     }
 
+    /**
+     * Метод получения id пользователя
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Метод определения id пользователя
+     */
     public void setId(long id) {
         this.id = id;
     }
 
+    /**
+     * Метод получения логина пользователя
+     */
     public String getLogin() {
         return login;
     }
 
+    /**
+     * Метод определения логина пользователя
+     */
     public void setLogin(String login) {
         this.login = login;
     }
 
+    /**
+     * Метод получения адреса электронной почты пользователя
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Метод определения адреса электронной почты пользователя
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     * Метод получения пароля пользователя
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Метод определения пароля пользователя
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Метод получения роли пользователя
+     */
     public Role getRole() {
         return role;
     }
 
+    /**
+     * Метод определения роли пользователя
+     */
     public void setRole(Role role) {
         this.role = role;
     }
 
+    /**
+     * Метод получения даты рождения пользователя
+     */
     public Date getBirthday() {
         return birthday;
     }
 
+    /**
+     * Метод определения даты рождения пользователя
+     */
     public void setBirthday(Date birthDate) {
         this.birthday = birthDate;
     }
 
+    /**
+     * Метод получения города проживания пользователя
+     */
     public String getCity() {
         return city;
     }
 
+    /**
+     * Метод определения города проживания пользователя
+     */
     public void setCity(String city) {
         this.city = city;
     }
 
+    /**
+     * Метод получения описания пользователя
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Метод определения описания пользователя
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * Переопределение метода {@code equals()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -118,11 +213,19 @@ public class User {
                 && Objects.equals(city, user.city) && Objects.equals(description, user.description) && role == user.role;
     }
 
+    /**
+     * Переопределение метода {@code hashCode()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id, login, email, password, birthday, city, description, role);
     }
 
+    /**
+     * Переопределение метода {@code toString()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
     @Override
     public String toString() {
         return "User{" +

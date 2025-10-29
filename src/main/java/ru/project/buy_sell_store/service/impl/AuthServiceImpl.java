@@ -8,16 +8,33 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.project.buy_sell_store.dto.LoginDTO;
-import ru.project.buy_sell_store.dto.RegisterUserDTO;
+import ru.project.buy_sell_store.dto.RegisterDTO;
 import ru.project.buy_sell_store.service.AuthService;
 import ru.project.buy_sell_store.service.UserService;
 
+/**
+ * Сервис, отвечающий за аутентификацию пользователей.
+ * Реализует интерфейс {@link AuthService}.
+ * Используется для регистрации, входа и выхода.
+ * @author SapeginMihail
+ */
 @Service
 public class AuthServiceImpl implements AuthService {
 
+    /**
+     * Интерфейс для обработки аутентификации
+     */
     private final AuthenticationManager authenticationManager;
+
+    /**
+     * Интерфейс для работы с User.
+     * Позволяет создавать аккаунт для нового пользователя
+     */
     private final UserService userService;
 
+    /**
+     * Конструктор для внедрения нужных зависимостей и создания экземпляра класса AuthServiceImpl
+     */
     @Autowired
     public AuthServiceImpl(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
@@ -25,8 +42,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(RegisterUserDTO registerUserDTO){
-        userService.create(registerUserDTO);
+    public void register(RegisterDTO registerDTO){
+        userService.create(registerDTO);
     }
 
     @Override

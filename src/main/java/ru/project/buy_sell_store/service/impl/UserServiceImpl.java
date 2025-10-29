@@ -5,17 +5,33 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.project.buy_sell_store.dto.UserDTO;
-import ru.project.buy_sell_store.dto.RegisterUserDTO;
+import ru.project.buy_sell_store.dto.RegisterDTO;
 import ru.project.buy_sell_store.model.User;
 import ru.project.buy_sell_store.repository.UserRepository;
 import ru.project.buy_sell_store.service.UserService;
 
+/**
+ * Реализация интерфейса {@link UserService}
+ * @author SapeginMihail
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
+    /**
+     * Репозиторий для работы с сущностью {@link User}
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Экземпляр {@link PasswordEncoder}, используемый для шифрования паролей.
+     */
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Конструктор для внедрения нужных зависимостей и создания экземпляра класса {@link UserServiceImpl}.
+     * @param userRepository репозиторий для работы с сущностью {@link User}
+     * @param passwordEncoder экземпляр для шифрования паролей
+     */
     @Autowired
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -24,25 +40,25 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void create(RegisterUserDTO registerUserDTO) {
+    public User create(RegisterDTO registerDTO) {
         User user = new User();
-        user.setLogin(registerUserDTO.login());
-        user.setEmail(registerUserDTO.email());
-        user.setPassword(passwordEncoder.encode(registerUserDTO.password()));
-        user.setRole(registerUserDTO.role());
-        userRepository.save(user);
+        user.setLogin(registerDTO.login());
+        user.setEmail(registerDTO.email());
+        user.setPassword(passwordEncoder.encode(registerDTO.password()));
+        user.setRole(registerDTO.role());
+        return userRepository.save(user);
     }
 
     @Transactional
     @Override
-    public void update(Long userId, UserDTO userDTO) {
+    public User update(Long userId, UserDTO userDTO) {
         User user = getUserById(userId);
         user.setEmail(userDTO.email());
         user.setLogin(userDTO.login());
         user.setBirthday(userDTO.birthDate());
         user.setCity(userDTO.city());
         user.setDescription(userDTO.description());
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
@@ -55,16 +71,5 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь с таким id не найден"));
-    }
-
-    @Override
-    public UserDTO mapToDTO(User user) {
-        return new UserDTO(
-                user.getLogin(),
-                user.getEmail(),
-                user.getBirthday(),
-                user.getCity(),
-                user.getDescription()
-        );
     }
 }
