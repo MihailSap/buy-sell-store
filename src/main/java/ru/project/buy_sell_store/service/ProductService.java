@@ -1,97 +1,47 @@
 package ru.project.buy_sell_store.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.project.buy_sell_store.model.Product;
-import ru.project.buy_sell_store.repository.ProductRepository;
 
 import java.util.List;
 
 /**
- * Севрис для управление сущности Товара
+ * Сервисный интерфейс для работы с сущностью Товара
  */
-@Service
-public class ProductService {
-
-    private final ProductRepository productRepository;
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+public interface ProductService {
 
     /**
-     * Сохранить товар в базу данных
+     * Сохранить товар
      */
-    @Transactional
-    public Product save(Product product) {
-        return productRepository.save(product);
-    }
+    Product save(Product product);
 
     /**
-     * Получить все товары из базы данных
+     * Получить все товары
      */
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
+    List<Product> findAll();
 
     /**
-     * Получить товар из базы данных по id
+     * Получить товар по id
      */
-    public Product findById(Long id) {
-        return productRepository.findById(id)
-               .orElseThrow(() -> new RuntimeException("Товар не найден"));
-    }
+    Product findById(Long id);
 
     /**
-     * Обновить товар из базы данных по id
+     * Обновить товар по id
      */
-    @Transactional
-    public void update(Long id, Product updatedProduct) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Товар не найден"));
-        product.setName(updatedProduct.getName());
-        product.setDescription(updatedProduct.getDescription());
-        product.setCost(updatedProduct.getCost());
-
-        productRepository.save(product);
-    }
+    void update(Long id, Product updatedProduct);
 
     /**
-     * Удалить товар по id
+     * Удалить товар  по id
      */
-    @Transactional
-    public void delete(Long id) {
-        productRepository.deleteById(id);
-    }
+    void delete(Long id);
 
     /**
      * Архивировать товар по id
      */
-    @Transactional
-    public void archive(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Товар не найден"));
-
-        if(product.isArchived()) {
-            throw new RuntimeException("Товар находится уже в архиве");
-        }
-
-        product.setArchived(true);
-        productRepository.save(product);
-    }
+    void archive(Long id);
 
     /**
      * Восстановить из архива по id
      */
-    @Transactional
-    public void restore(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Товар не найден"));
-
-        if (!product.isArchived()) {
-            throw new RuntimeException("Товар уже доступен и не находится в архиве");
-        }
-
-        product.setArchived(false);
-        productRepository.save(product);
-    }
+    void restore(Long id);
 }
+
