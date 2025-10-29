@@ -2,12 +2,13 @@ package ru.project.buy_sell_store.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.ProductDTO;
+import ru.project.buy_sell_store.mapper.ProductMapper;
 import ru.project.buy_sell_store.service.ProductService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер для управление Товара
@@ -17,16 +18,19 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    public ProductController(ProductService productService) {
+    private final ProductMapper productMapper;
+    public ProductController(ProductService productService, ProductMapper productMapper) {
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     /**
      * Получение всех товаров
      */
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public List<ProductDTO> findAll() {
+        return productService.findAll().stream().map(productMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -35,7 +39,7 @@ public class ProductController {
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody ProductDTO productDto) {
-        productService.save(productDto);
+        productService.save(productMapper.toEntity(productDto));
         return "Продукт создан!";
     }
 
@@ -44,7 +48,7 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     public ProductDTO findById(@PathVariable("id") Long id) {
-        return productService.findById(id);
+        return productMapper.toDto(productService.findById(id));
     }
 
     /**
@@ -53,7 +57,7 @@ public class ProductController {
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
                                             @Valid @RequestBody ProductDTO productDto) {
-        productService.update(id, productDto);
+        productService.update(id, productMapper.toEntity(productDto));
         return "Продукт изменен!";
     }
 

@@ -1,4 +1,4 @@
-package ru.project.buy_sell_store.entity;
+package ru.project.buy_sell_store.model;
 
 import jakarta.persistence.*;
 

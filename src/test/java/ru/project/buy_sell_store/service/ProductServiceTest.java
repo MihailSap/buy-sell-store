@@ -6,13 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.project.buy_sell_store.dto.ProductDTO;
-import ru.project.buy_sell_store.entity.Product;
+import ru.project.buy_sell_store.model.Product;
 import ru.project.buy_sell_store.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Тесты для проверки функционала ProductService
+ */
 @SpringBootTest
 @Transactional
 class ProductServiceTest {
@@ -23,90 +25,140 @@ class ProductServiceTest {
     @Autowired
     private ProductRepository productRepository;
 
-    private ProductDTO productDto;
+    private Product product;
 
+    /**
+     * Подготовка тестовых данных перед каждым тестом
+     */
     @BeforeEach
     void setUp() {
-        productDto = new ProductDTO();
-        productDto.setName("Футболка Nike");
-        productDto.setDescription("Отличная");
-        productDto.setCategory("CLOTHES");
-        productDto.setCost(2499);
+        product = new Product();
+        product.setName("Футболка Nike");
+        product.setDescription("Отличная");
+        product.setCategory("CLOTHES");
+        product.setCost(2499);
     }
 
+    /**
+     * Проверяет сохранение товара в базу данных
+     *
+     * Ожидается, что после вызова метода товар будет сохранен
+     * и у него будет индификатор
+     */
     @Test
     void saveTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
-        Assertions.assertEquals(productDto.getName(), savedProductDto.getName());
+        Product savedProduct = productService.save(product);
+
+        Assertions.assertNotNull(savedProduct.getId());
+        Assertions.assertEquals(product.getName(), savedProduct.getName());
     }
 
+    /**
+     * Проверяет корректность получения товара по id из базы данных
+     *
+     * Ожидается, что сохранненый товар можно найти
+     */
     @Test
     void findByIdTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
+        Product savedProduct = productService.save(product);
 
-        ProductDTO foundProductDto = productService.findById(savedProductDto.getId());
-        Assertions.assertEquals(savedProductDto.getId(), foundProductDto.getId());
+        Product foundProduct = productService.findById(savedProduct.getId());
+        Assertions.assertEquals(savedProduct.getId(), foundProduct.getId());
     }
 
+    /**
+     * Проверяет корректность получения всех товаров из базы данных
+     *
+     * После добавления двух товаров ожидается, что
+     * вернётся непустой список с сохраннеными товарами
+     */
     @Test
     void findAllTest() {
-        ProductDTO newProductDto = new ProductDTO();
-        newProductDto.setName("Футболка с длинным рукавом");
-        newProductDto.setDescription("Удобная");
-        newProductDto.setCategory("CLOTHES");
-        newProductDto.setCost(3000);
+        Product newProduct = new Product();
+        newProduct.setName("Футболка с длинным рукавом");
+        newProduct.setDescription("Удобная");
+        newProduct.setCategory("CLOTHES");
+        newProduct.setCost(3000);
 
-        productService.save(productDto);
-        productService.save(newProductDto);
+        productService.save(product);
+        productService.save(newProduct);
 
-        List<ProductDTO> productDtoList = productService.findAll();
+        List<Product> products = productService.findAll();
 
-        Assertions.assertTrue(productDtoList.size() >= 2);
+        Assertions.assertFalse(products.isEmpty());
+        Assertions.assertTrue(
+                products.stream().anyMatch(p -> p.getName().equals("Футболка Nike"))
+        );
+        Assertions.assertTrue(
+                products.stream().anyMatch(
+                        p -> p.getName().equals("Футболка с длинным рукавом"))
+        );
     }
 
+    /**
+     * Проверяет корректность обновления данных товара из базы данных
+     *
+     * Ожидается, что товар должен иметь обновленные поля
+     */
     @Test
     void updateTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
+        Product savedProduct = productService.save(product);
 
-        ProductDTO updatedProductDto = new ProductDTO();
-        updatedProductDto.setName("Футболка Adidas");
-        updatedProductDto.setDescription("Отличная, удобная");
-        updatedProductDto.setCost(2799);
+        Product updatedProduct = new Product();
+        updatedProduct.setName("Футболка Adidas");
+        updatedProduct.setDescription("Отличная, удобная");
+        updatedProduct.setCost(2799);
 
-        productService.update(savedProductDto.getId(), updatedProductDto);
+        productService.update(savedProduct.getId(), updatedProduct);
 
-        ProductDTO foundProductDto = productService.findById(savedProductDto.getId());
+        Product foundProduct = productService.findById(savedProduct.getId());
 
-        Assertions.assertEquals(savedProductDto.getId(), foundProductDto.getId());
-        Assertions.assertEquals("Футболка Adidas", foundProductDto.getName());
+        Assertions.assertEquals(savedProduct.getId(), foundProduct.getId());
+        Assertions.assertEquals("Футболка Adidas", foundProduct.getName());
     }
 
+    /**
+     * Проверяет корректность удаления товара из базы данных
+     *
+     * Ожидается, что при попытке получить товар по id после удаления
+     * выбросится исключение
+     */
     @Test
     void deleteTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
-        productService.delete(savedProductDto.getId());
+        Product savedProduct = productService.save(product);
+        productService.delete(savedProduct.getId());
         RuntimeException ex = Assertions.assertThrows(RuntimeException.class, () -> {
-            productService.findById(savedProductDto.getId());
+            productService.findById(savedProduct.getId());
         });
         Assertions.assertEquals("Товар не найден", ex.getMessage());
     }
 
+    /**
+     * Проверяет процесс архивирования товара
+     *
+     * Ожидается, значение поля archived станет true
+     */
     @Test
     void archiveTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
-        productService.archive(savedProductDto.getId());
+        Product savedProduct = productService.save(product);
+        productService.archive(savedProduct.getId());
 
-        Optional<Product> foundProduct = productRepository.findById(savedProductDto.getId());
+        Optional<Product> foundProduct = productRepository.findById(savedProduct.getId());
         Assertions.assertTrue(foundProduct.get().isArchived());
     }
 
+    /**
+     * Проверяет восстановление товара из архива
+     *
+     * Ожидается, значение поля archived станет false
+     */
     @Test
     void restoreTest() {
-        ProductDTO savedProductDto = productService.save(productDto);
-        productService.archive(savedProductDto.getId());
-        productService.restore(savedProductDto.getId());
+        Product savedProduct = productService.save(product);
+        productService.archive(savedProduct.getId());
+        productService.restore(savedProduct.getId());
 
-        Optional<Product> foundProduct = productRepository.findById(savedProductDto.getId());
+        Optional<Product> foundProduct = productRepository.findById(savedProduct.getId());
         Assertions.assertFalse(foundProduct.get().isArchived());
     }
 }

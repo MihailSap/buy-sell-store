@@ -2,15 +2,13 @@ package ru.project.buy_sell_store.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.project.buy_sell_store.dto.ProductDTO;
-import ru.project.buy_sell_store.entity.Product;
+import ru.project.buy_sell_store.model.Product;
 import ru.project.buy_sell_store.repository.ProductRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Севрис для управление Товара
+ * Севрис для управление сущности Товара
  */
 @Service
 public class ProductService {
@@ -24,41 +22,37 @@ public class ProductService {
      * Сохранить товар в базу данных
      */
     @Transactional
-    public ProductDTO save(ProductDTO productDto) {
-        Product savedProduct = productRepository.save(toEntity(productDto));
-
-        return toDto(savedProduct);
+    public Product save(Product product) {
+        return productRepository.save(product);
     }
 
     /**
      * Получить все товары из базы данных
      */
-    public List<ProductDTO> findAll() {
-        return productRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+    public List<Product> findAll() {
+        return productRepository.findAll();
     }
 
     /**
      * Получить товар из базы данных по id
      */
-    public ProductDTO findById(Long id) {
-       Product product = productRepository.findById(id)
+    public Product findById(Long id) {
+        return productRepository.findById(id)
                .orElseThrow(() -> new RuntimeException("Товар не найден"));
-       return toDto(product);
     }
 
     /**
      * Обновить товар из базы данных по id
      */
     @Transactional
-    public ProductDTO update(Long id, ProductDTO productDto) {
+    public void update(Long id, Product updatedProduct) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setCost(productDto.getCost());
+        product.setName(updatedProduct.getName());
+        product.setDescription(updatedProduct.getDescription());
+        product.setCost(updatedProduct.getCost());
 
-        Product savedProduct = productRepository.save(product);
-        return toDto(savedProduct);
+        productRepository.save(product);
     }
 
     /**
@@ -73,7 +67,7 @@ public class ProductService {
      * Архивировать товар по id
      */
     @Transactional
-    public ProductDTO archive(Long id) {
+    public void archive(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
@@ -82,15 +76,14 @@ public class ProductService {
         }
 
         product.setArchived(true);
-        Product savedProduct = productRepository.save(product);
-        return toDto(savedProduct);
+        productRepository.save(product);
     }
 
     /**
      * Восстановить из архива по id
      */
     @Transactional
-    public ProductDTO restore(Long id) {
+    public void restore(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
@@ -99,32 +92,6 @@ public class ProductService {
         }
 
         product.setArchived(false);
-        Product savedProduct = productRepository.save(product);
-        return toDto(savedProduct);
-    }
-
-    /**
-     * Преобразование товара из DTO в Entity
-     */
-    private Product toEntity(ProductDTO productDto) {
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
-        product.setCost(productDto.getCost());
-        return product;
-    }
-
-    /**
-     * Преобразование товара из Entity в DTO
-     */
-    private ProductDTO toDto(Product product) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setName(product.getName());
-        productDTO.setDescription(product.getDescription());
-        productDTO.setCategory(product.getCategory());
-        productDTO.setCost(product.getCost());
-        return productDTO;
+        productRepository.save(product);
     }
 }
