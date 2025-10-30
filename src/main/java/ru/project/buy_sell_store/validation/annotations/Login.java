@@ -1,31 +1,36 @@
-package ru.project.buy_sell_store.validation.constraints;
+package ru.project.buy_sell_store.validation.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 
 import java.lang.annotation.*;
 
 /**
- * Аннотация для проверки корректности введенного пароля.
+ * Аннотация для проверки корректности введенного логина.
  * При нарушении правила возвращает соответствующее сообщение об ошибке.
  * @author SapeginMihail
  */
-@NotEmpty(message = "Пароль не должен быть пустым")
-@Length(max = 30, message = "Длина пароля не должна превышать 30 символов")
+@Pattern(
+        regexp = "^[A-Za-zА-Яа-я0-9]+$",
+        message = "Логин может содержать только буквы и цифры"
+)
+@NotEmpty(message = "Логин не должен быть пустым")
+@Length(max = 30, message = "Длина логина не должна превышать 30 символов")
 @Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {})
-public @interface Password {
+public @interface Login {
 
     /**
      * Сообщение об ошибке.
-     * Возвращается, если пароль указан некорректно
+     * Возвращается, если логин указан некорректно
      * @return строка с сообщением об ошибке
      */
-    String message() default "Некорректный пароль";
+    String message() default "Некорректный логин";
 
     /**
      * Группы валидации

@@ -1,7 +1,7 @@
 package ru.project.buy_sell_store.dto;
 
-import ru.project.buy_sell_store.validation.constraints.Login;
-import ru.project.buy_sell_store.validation.constraints.Password;
+import ru.project.buy_sell_store.validation.annotations.Login;
+import ru.project.buy_sell_store.validation.annotations.Password;
 
 /**
  * DTO, отправляемое пользователем при входе

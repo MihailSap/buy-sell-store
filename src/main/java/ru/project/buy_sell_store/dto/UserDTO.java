@@ -1,8 +1,8 @@
 package ru.project.buy_sell_store.dto;
 
 import jakarta.validation.constraints.Email;
-import ru.project.buy_sell_store.validation.constraints.BirthDate;
-import ru.project.buy_sell_store.validation.constraints.Login;
+import ru.project.buy_sell_store.validation.annotations.BirthDate;
+import ru.project.buy_sell_store.validation.annotations.Login;
 
 import java.util.Date;
 

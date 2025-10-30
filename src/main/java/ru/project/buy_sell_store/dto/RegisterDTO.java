@@ -2,9 +2,9 @@ package ru.project.buy_sell_store.dto;
 
 import jakarta.validation.constraints.Email;
 import ru.project.buy_sell_store.enums.RoleEnum;
-import ru.project.buy_sell_store.validation.constraints.Login;
-import ru.project.buy_sell_store.validation.constraints.Password;
-import ru.project.buy_sell_store.validation.constraints.Role;
+import ru.project.buy_sell_store.validation.annotations.Login;
+import ru.project.buy_sell_store.validation.annotations.Password;
+import ru.project.buy_sell_store.validation.annotations.Role;
 
 /**
  * DTO, отправляемое пользователем при регистрации

@@ -3,7 +3,7 @@ package ru.project.buy_sell_store.validation.validators;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import ru.project.buy_sell_store.enums.RoleEnum;
-import ru.project.buy_sell_store.validation.constraints.Role;
+import ru.project.buy_sell_store.validation.annotations.Role;
 
 /**
  * Валидатор для проверки корректности указанной роли.

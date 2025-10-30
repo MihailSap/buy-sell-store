@@ -2,7 +2,7 @@ package ru.project.buy_sell_store.validation.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.project.buy_sell_store.validation.constraints.BirthDate;
+import ru.project.buy_sell_store.validation.annotations.BirthDate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -1,4 +1,4 @@
-package ru.project.buy_sell_store.validation.constraints;
+package ru.project.buy_sell_store.validation.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
