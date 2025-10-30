@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import ru.project.buy_sell_store.enums.RoleEnum;
 import ru.project.buy_sell_store.validation.annotations.Login;
 import ru.project.buy_sell_store.validation.annotations.Password;
-import ru.project.buy_sell_store.validation.annotations.Role;
 
 /**
  * DTO, отправляемое пользователем при регистрации
@@ -42,7 +41,6 @@ public class RegisterDTO {
      * Определяется только при регистрации.
      * Может принимать только следующие значения: SUPPLIER, SELLER, BUYER
      */
-    @Role
     private RoleEnum role;
 
     /**

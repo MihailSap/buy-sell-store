@@ -41,6 +41,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User create(RegisterDTO registerDTO) {
+        if(userRepository.existsByLogin(registerDTO.getLogin())){
+            throw new RuntimeException("Пользователь с таким логином уже существует");
+        }
+
         User user = new User();
         user.setLogin(registerDTO.getLogin());
         user.setEmail(registerDTO.getEmail());

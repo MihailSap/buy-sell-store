@@ -1,12 +1,15 @@
 package ru.project.buy_sell_store.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.mapper.UserMapper;
 import ru.project.buy_sell_store.model.User;
+import ru.project.buy_sell_store.service.AuthService;
 import ru.project.buy_sell_store.service.UserService;
+import ru.project.buy_sell_store.service.impl.AuthServiceImpl;
 import ru.project.buy_sell_store.service.impl.UserServiceImpl;
 
 /**
@@ -31,14 +34,20 @@ public class UserController {
     private final UserMapper userMapper;
 
     /**
+     * Интерфейс, предоставляющий метод для выхода из аккаунта
+     */
+    private final AuthService authService;
+
+    /**
      * Конструктор контроллера для внедрения нужных зависимостей и создания экземпляра класса {@link UserController}
      * @param userService реализация интерфейса для работы с {@link User}
      * @param userMapper
      */
     @Autowired
-    public UserController(UserServiceImpl userService, UserMapper userMapper) {
+    public UserController(UserServiceImpl userService, UserMapper userMapper, AuthServiceImpl authService) {
         this.userService = userService;
         this.userMapper = userMapper;
+        this.authService = authService;
     }
 
     /**
@@ -70,7 +79,8 @@ public class UserController {
      * @return строка, сообщающая об успешном удалении пользователя
      */
     @DeleteMapping("/{userId}")
-    public String delete(@PathVariable("userId") Long userId){
+    public String delete(@PathVariable("userId") Long userId, HttpSession session){
+        authService.logout(session);
         userService.delete(userId);
         return "Профиль пользователя удален!";
     }

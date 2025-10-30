@@ -18,4 +18,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Получение {@link User} из БД по его логину (если он существует)
      */
     Optional<User> findByLogin(String login);
+
+    /**
+     * Проверка, существует ли пользователь с таким логином
+     * @param login логин, по которому выполняется поиск пользователя
+     * @return {@code true}, если пользователь с таким логином существует
+     */
+    boolean existsByLogin(String login);
 }
