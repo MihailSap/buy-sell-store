@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void login(LoginDTO loginDTO, HttpSession session){
         UsernamePasswordAuthenticationToken authenticationInputToken = new UsernamePasswordAuthenticationToken(
-                loginDTO.login(), loginDTO.password()
+                loginDTO.getLogin(), loginDTO.getPassword()
         );
 
         Authentication authentication = authenticationManager.authenticate(authenticationInputToken);

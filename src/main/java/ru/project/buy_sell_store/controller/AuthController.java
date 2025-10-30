@@ -3,6 +3,7 @@ package ru.project.buy_sell_store.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.LoginDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
@@ -40,7 +41,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public String register(@RequestBody RegisterDTO registerDTO) {
         authService.register(registerDTO);
-        return String.format("Пользователь %s зарегистрирован!", registerDTO.login());
+        return String.format("Пользователь %s зарегистрирован!", registerDTO.getLogin());
     }
 
     /**
@@ -50,9 +51,9 @@ public class AuthController {
      * @return строка с приветствием по логину
      */
     @PostMapping("/login")
-    public String login(@RequestBody LoginDTO loginDTO, HttpSession session){
+    public String login(@Validated @RequestBody LoginDTO loginDTO, HttpSession session){
         authService.login(loginDTO, session);
-        return String.format("С возвращением, %s!", loginDTO.login());
+        return String.format("С возвращением, %s!", loginDTO.getLogin());
     }
 
     /**

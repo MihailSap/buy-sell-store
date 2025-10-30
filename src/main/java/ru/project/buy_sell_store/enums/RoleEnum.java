@@ -5,7 +5,7 @@ package ru.project.buy_sell_store.enums;
  * <p>Используются для определения возможностей.</p>
  * @author SapeginMihail
  */
-public enum Role {
+public enum RoleEnum {
 
     /**
      * <b>Поставщик</b>.

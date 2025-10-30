@@ -1,7 +1,7 @@
 package ru.project.buy_sell_store.service;
 
-import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
+import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.model.User;
 
 /**

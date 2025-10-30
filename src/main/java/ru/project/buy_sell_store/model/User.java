@@ -1,7 +1,7 @@
 package ru.project.buy_sell_store.model;
 
 import jakarta.persistence.*;
-import ru.project.buy_sell_store.enums.Role;
+import ru.project.buy_sell_store.enums.RoleEnum;
 
 import java.util.Date;
 import java.util.Objects;
@@ -63,12 +63,12 @@ public class User {
      * <p>Определяется пользователем при регистрации. Сохраняется в БД как строка.</p>
      */
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private RoleEnum role;
 
     /**
      * Конструктор
      */
-    public User(long id, String login, String email, String password, Date birthDate, String city, String description, Role role) {
+    public User(long id, String login, String email, String password, Date birthDate, String city, String description, RoleEnum role) {
         this.id = id;
         this.login = login;
         this.email = email;
@@ -146,14 +146,14 @@ public class User {
     /**
      * Метод получения роли пользователя
      */
-    public Role getRole() {
+    public RoleEnum getRole() {
         return role;
     }
 
     /**
      * Метод определения роли пользователя
      */
-    public void setRole(Role role) {
+    public void setRole(RoleEnum role) {
         this.role = role;
     }
 

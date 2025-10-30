@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
+import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.model.User;
 import ru.project.buy_sell_store.repository.UserRepository;
 import ru.project.buy_sell_store.service.UserService;
@@ -42,10 +42,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(RegisterDTO registerDTO) {
         User user = new User();
-        user.setLogin(registerDTO.login());
-        user.setEmail(registerDTO.email());
-        user.setPassword(passwordEncoder.encode(registerDTO.password()));
-        user.setRole(registerDTO.role());
+        user.setLogin(registerDTO.getLogin());
+        user.setEmail(registerDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        user.setRole(registerDTO.getRole());
         return userRepository.save(user);
     }
 
@@ -53,11 +53,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(Long userId, UserDTO userDTO) {
         User user = getUserById(userId);
-        user.setEmail(userDTO.email());
-        user.setLogin(userDTO.login());
-        user.setBirthDate(userDTO.birthDate());
-        user.setCity(userDTO.city());
-        user.setDescription(userDTO.description());
+        user.setEmail(userDTO.getEmail());
+        user.setLogin(userDTO.getLogin());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setCity(userDTO.getCity());
+        user.setDescription(userDTO.getDescription());
         return userRepository.save(user);
     }
 
