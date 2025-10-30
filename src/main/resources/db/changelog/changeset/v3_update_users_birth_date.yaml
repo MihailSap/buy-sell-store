@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: SapeginMihail
+      changes:
+        - renameColumn:
+            tableName: users
+            oldColumnName: birthday
+            newColumnName: birth_date

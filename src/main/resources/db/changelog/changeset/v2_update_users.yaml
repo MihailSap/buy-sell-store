@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: SapeginMihail
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: city
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: role
+                  type: VARCHAR(30)
