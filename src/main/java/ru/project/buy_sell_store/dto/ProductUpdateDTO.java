@@ -22,12 +22,6 @@ public class ProductUpdateDTO {
     @Positive(message = "Стоимость должна быть больше нуля")
     private Integer cost;
 
-
-
-
-
-
-
     /**
      * Получить имя
      */
