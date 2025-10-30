@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.ProductDTO;
+import ru.project.buy_sell_store.dto.ProductUpdateDTO;
 import ru.project.buy_sell_store.mapper.ProductMapper;
 import ru.project.buy_sell_store.service.ProductService;
 
@@ -56,8 +57,8 @@ public class ProductController {
      */
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
-                                            @Valid @RequestBody ProductDTO productDto) {
-        productService.update(id, productMapper.toEntity(productDto));
+                                            @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+        productService.update(id, productMapper.toEntity(productUpdateDTO));
         return "Продукт изменен!";
     }
 

@@ -3,9 +3,9 @@ package ru.project.buy_sell_store.dto;
 import jakarta.validation.constraints.*;
 
 /**
- * DTO товара для передачи данных между клиентом и сервером
+ * DTO для обновления товара
  */
-public class ProductDTO {
+public class ProductUpdateDTO {
 
     @NotBlank(message = "Название не может быть пустым")
     @Size(max = 30, message = "Название не должно превышать 30 символов")
@@ -17,13 +17,6 @@ public class ProductDTO {
 
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
-
-    @NotBlank(message = "Категория не может быть пустой")
-    @Pattern(
-            regexp = "^[A-Za-zА-Яа-я ]+$",
-            message = "Категория может содержать только буквы"
-    )
-    private String category;
 
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
@@ -37,13 +30,6 @@ public class ProductDTO {
     }
 
     /**
-     * Установить имя
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
      * Получить описание
      */
     public String getDescription() {
@@ -51,37 +37,9 @@ public class ProductDTO {
     }
 
     /**
-     * Установить описание
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Получить категорию
-     */
-    public String getCategory() {
-        return category;
-    }
-
-    /**
-     * Установить категорию
-     */
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    /**
      * Получить стоимость
      */
     public Integer getCost() {
         return cost;
-    }
-
-    /**
-     * Установить стоимость
-     */
-    public void setCost(Integer cost) {
-        this.cost = cost;
     }
 }
