@@ -5,12 +5,23 @@ import jakarta.validation.ConstraintValidatorContext;
 import ru.project.buy_sell_store.enums.RoleEnum;
 import ru.project.buy_sell_store.validation.constraints.Role;
 
-public class RoleValidator implements ConstraintValidator<Role, RoleEnum> {
+/**
+ * Валидатор для проверки корректности указанной роли.
+ * Проверяет, что роль, которую указал пользователь, существует в системе
+ * @author SapeginMihail
+ */
+public class RoleValidator implements ConstraintValidator<Role, String> {
 
+    /**
+     * Проверка, существует ли в системе роль, указанная пользователем
+     * @param inputRole роль, которую ввел пользователь
+     * @param constraintValidatorContext контекст валидации
+     * @return {@code true}, если указанная роль корректна; {@code false}, если нет
+     */
     @Override
-    public boolean isValid(RoleEnum role, ConstraintValidatorContext context) {
-        for (RoleEnum r : RoleEnum.values()) {
-            if (r == role) {
+    public boolean isValid(String inputRole, ConstraintValidatorContext constraintValidatorContext) {
+        for (RoleEnum role : RoleEnum.values()) {
+            if (role.name().equals(inputRole)) {
                 return true;
             }
         }

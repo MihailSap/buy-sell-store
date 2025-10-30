@@ -8,6 +8,11 @@ import org.hibernate.validator.constraints.Length;
 
 import java.lang.annotation.*;
 
+/**
+ * Аннотация для проверки корректности введенного логина.
+ * При нарушении правила возвращает соответствующее сообщение об ошибке.
+ * @author SapeginMihail
+ */
 @Pattern(
         regexp = "^[A-Za-zА-Яа-я0-9]+$",
         message = "Логин может содержать только буквы и цифры"
@@ -20,9 +25,21 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {})
 public @interface Login {
 
+    /**
+     * Сообщение об ошибке.
+     * Возвращается, если логин указан некорректно
+     * @return строка с сообщением об ошибке
+     */
     String message() default "Некорректный логин";
 
+    /**
+     * Группы валидации
+     * @return по умолчанию группы валидации пустые
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * Дополнительные данные
+     */
     Class<? extends Payload>[] payload() default {};
 }
