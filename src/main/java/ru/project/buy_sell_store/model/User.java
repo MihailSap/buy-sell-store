@@ -1,0 +1,242 @@
+package ru.project.buy_sell_store.model;
+
+import jakarta.persistence.*;
+import ru.project.buy_sell_store.enums.RoleEnum;
+
+import java.util.Date;
+import java.util.Objects;
+
+/**
+ * <b>Сущность пользователя</b>
+ * @author SapeginMihail
+ */
+@Entity
+@Table(name = "users")
+public class User {
+
+    /**
+     * <b>id пользователя.</b>
+     * <p>Определяется при создании сущности</p>
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    /**
+     * <b>Логин</b>
+     * <p>Именно по нему пользователь выполняет вход</p>
+     */
+    private String login;
+
+    /**
+     * <b>Адрес электронной почты</b>
+     * <p>Определяется пользователем при регистрации</p>
+     */
+    private String email;
+
+    /**
+     * <b>Пароль</b>
+     * <p>Определяется пользователем при регистрации. Хранится в зашифрованном виде.</p>
+     */
+    private String password;
+
+    /**
+     * <b>Дата рождения</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
+    private Date birthDate;
+
+    /**
+     * <b>Город проживания</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
+    private String city;
+
+    /**
+     * <b>Описание аккаунта</b>
+     * <p>Определяется пользователем при обновлении профиля.</p>
+     */
+    private String description;
+
+    /**
+     * <b>Роль</b>
+     * <p>Определяется пользователем при регистрации. Сохраняется в БД как строка.</p>
+     */
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
+
+    /**
+     * Конструктор
+     */
+    public User(long id, String login, String email, String password, Date birthDate, String city, String description, RoleEnum role) {
+        this.id = id;
+        this.login = login;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.birthDate = birthDate;
+        this.city = city;
+        this.description = description;
+    }
+
+    /**
+     * Пустой конструктор
+     * Необходим для сущности
+     */
+    public User() {
+
+    }
+
+    /**
+     * Метод получения id пользователя
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
+     * Метод определения id пользователя
+     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    /**
+     * Метод получения логина пользователя
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * Метод определения логина пользователя
+     */
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    /**
+     * Метод получения адреса электронной почты пользователя
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * Метод определения адреса электронной почты пользователя
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
+     * Метод получения пароля пользователя
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Метод определения пароля пользователя
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Метод получения роли пользователя
+     */
+    public RoleEnum getRole() {
+        return role;
+    }
+
+    /**
+     * Метод определения роли пользователя
+     */
+    public void setRole(RoleEnum role) {
+        this.role = role;
+    }
+
+    /**
+     * Метод получения даты рождения пользователя
+     */
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    /**
+     * Метод определения даты рождения пользователя
+     */
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    /**
+     * Метод получения города проживания пользователя
+     */
+    public String getCity() {
+        return city;
+    }
+
+    /**
+     * Метод определения города проживания пользователя
+     */
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    /**
+     * Метод получения описания пользователя
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Метод определения описания пользователя
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * Переопределение метода {@code equals()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id == user.id && Objects.equals(login, user.login) && Objects.equals(email, user.email)
+                && Objects.equals(password, user.password) && Objects.equals(birthDate, user.birthDate)
+                && Objects.equals(city, user.city) && Objects.equals(description, user.description) && role == user.role;
+    }
+
+    /**
+     * Переопределение метода {@code hashCode()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, email, password, birthDate, city, description, role);
+    }
+
+    /**
+     * Переопределение метода {@code toString()} для сущности пользователя.
+     * В нём используются все поля класса {@link User}
+     */
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", birthday=" + birthDate +
+                ", city='" + city + '\'' +
+                ", description='" + description + '\'' +
+                ", role=" + role +
+                '}';
+    }
+}

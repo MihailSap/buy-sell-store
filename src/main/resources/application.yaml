@@ -1,19 +1,21 @@
 spring:
-    application:
-      name: buy_sell_store
-    config:
-        import: optional:application-secret.yaml
+  application:
+    name: buy_sell_store
 
-    datasource:
-      driver-class-name: org.postgresql.Driver
-      url: ${SPRING_DATASOURCE_URL}
-      username: ${SPRING_DATASOURCE_USERNAME}
-      password: ${SPRING_DATASOURCE_PASSWORD}
+  config:
+    import:
+      optional:application-secret.yaml
 
-    jpa:
-      show-sql: true
-      hibernate:
-        ddl-auto: none
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
-    liquibase:
-        enabled: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+  liquibase:
+    enabled: true
