@@ -1,6 +1,7 @@
 package ru.project.buy_sell_store.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.mapper.UserMapper;
@@ -58,7 +59,7 @@ public class UserController {
      * @return строка, сообщающая об успешном изменении профиля
      */
     @PatchMapping("/{userId}")
-    public String update(@PathVariable("userId") Long userId, @RequestBody UserDTO userDTO){
+    public String update(@PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO){
         userService.update(userId, userDTO);
         return "Ваш профиль изменен!";
     }

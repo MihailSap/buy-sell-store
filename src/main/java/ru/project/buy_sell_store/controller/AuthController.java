@@ -39,7 +39,7 @@ public class AuthController {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(@RequestBody RegisterDTO registerDTO) {
+    public String register(@Validated @RequestBody RegisterDTO registerDTO) {
         authService.register(registerDTO);
         return String.format("Пользователь %s зарегистрирован!", registerDTO.getLogin());
     }
