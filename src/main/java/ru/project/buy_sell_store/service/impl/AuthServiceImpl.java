@@ -9,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.project.buy_sell_store.dto.LoginDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
+import ru.project.buy_sell_store.model.User;
+import ru.project.buy_sell_store.security.UserDetailsImpl;
 import ru.project.buy_sell_store.service.AuthService;
 import ru.project.buy_sell_store.service.UserService;
 
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void login(LoginDTO loginDTO, HttpSession session){
         UsernamePasswordAuthenticationToken authenticationInputToken = new UsernamePasswordAuthenticationToken(
-                loginDTO.getLogin(), loginDTO.getPassword()
+                loginDTO.getEmail(), loginDTO.getPassword()
         );
 
         Authentication authentication = authenticationManager.authenticate(authenticationInputToken);
@@ -61,5 +63,12 @@ public class AuthServiceImpl implements AuthService {
     public void logout(HttpSession session){
         session.invalidate();
         SecurityContextHolder.clearContext();
+    }
+
+    @Override
+    public User getAuthenticatedUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getUser();
     }
 }

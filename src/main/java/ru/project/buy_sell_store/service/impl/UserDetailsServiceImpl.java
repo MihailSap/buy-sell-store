@@ -32,15 +32,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     /**
-     * Получение из БД информации о пользователе в виде объекта {@link UserDetails}
-     * @param login логин пользователя
+     * Извлечение из БД информации о пользователе в виде объекта {@link UserDetails}
+     * @param email адрес электронной почты пользователя
      * @return объект {@link UserDetails} для найденного {@link User}
      * @throws UsernameNotFoundException появляется, когда пользователь с таким логином не найден
      */
     @Override
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        User user = userRepository.findByLogin(login)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким email не найден!"));
         return new UserDetailsImpl(user);
     }
 }

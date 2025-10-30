@@ -1,6 +1,6 @@
 package ru.project.buy_sell_store.dto;
 
-import ru.project.buy_sell_store.validation.annotations.Login;
+import jakarta.validation.constraints.Email;
 import ru.project.buy_sell_store.validation.annotations.Password;
 
 /**
@@ -9,15 +9,10 @@ import ru.project.buy_sell_store.validation.annotations.Password;
 public class LoginDTO {
 
     /**
-     * <b>Логин, под которым зарегистрирован пользователь</b>
-     * <ul>
-     *     <li>Должен состоять только из букв и цифр</li>
-     *     <li>Не должен быть пустым</li>
-     *     <li>Не должен быть длиннее 30 символов</li>
-     * </ul>
+     * Адрес электронной почты, под которым зарегистрирован пользователь
      */
-    @Login
-    private String login;
+    @Email(message = "Адрес электронной почты должен быть корректным, например: user@gmail.com")
+    private String email;
 
     /**
      * Пароль пользователя.
@@ -29,11 +24,11 @@ public class LoginDTO {
 
     /**
      * Конструктор
-     * @param login логин
+     * @param email адрес электронной почты
      * @param password пароль
      */
-    public LoginDTO(String login, String password) {
-        this.login = login;
+    public LoginDTO(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
@@ -44,11 +39,11 @@ public class LoginDTO {
     }
 
     /**
-     * Метод для получения логина
+     * Метод для получения адреса электронной почты
      * @return логин
      */
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
 
     /**
