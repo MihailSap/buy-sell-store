@@ -20,7 +20,7 @@ public class UserMapper {
         return new UserDTO(
                 user.getLogin(),
                 user.getEmail(),
-                user.getBirthday(),
+                user.getBirthDate(),
                 user.getCity(),
                 user.getDescription()
         );

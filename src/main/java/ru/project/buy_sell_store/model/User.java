@@ -44,7 +44,7 @@ public class User {
      * <b>Дата рождения</b>
      * <p>Определяется пользователем при обновлении профиля.</p>
      */
-    private Date birthday;
+    private Date birthDate;
 
     /**
      * <b>Город проживания</b>
@@ -68,13 +68,13 @@ public class User {
     /**
      * Конструктор
      */
-    public User(long id, String login, String email, String password, Date birthday, String city, String description, Role role) {
+    public User(long id, String login, String email, String password, Date birthDate, String city, String description, Role role) {
         this.id = id;
         this.login = login;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.birthday = birthday;
+        this.birthDate = birthDate;
         this.city = city;
         this.description = description;
     }
@@ -160,15 +160,15 @@ public class User {
     /**
      * Метод получения даты рождения пользователя
      */
-    public Date getBirthday() {
-        return birthday;
+    public Date getBirthDate() {
+        return birthDate;
     }
 
     /**
      * Метод определения даты рождения пользователя
      */
-    public void setBirthday(Date birthDate) {
-        this.birthday = birthDate;
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
     /**
@@ -209,7 +209,7 @@ public class User {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return id == user.id && Objects.equals(login, user.login) && Objects.equals(email, user.email)
-                && Objects.equals(password, user.password) && Objects.equals(birthday, user.birthday)
+                && Objects.equals(password, user.password) && Objects.equals(birthDate, user.birthDate)
                 && Objects.equals(city, user.city) && Objects.equals(description, user.description) && role == user.role;
     }
 
@@ -219,7 +219,7 @@ public class User {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, email, password, birthday, city, description, role);
+        return Objects.hash(id, login, email, password, birthDate, city, description, role);
     }
 
     /**
@@ -233,7 +233,7 @@ public class User {
                 ", login='" + login + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", birthday=" + birthday +
+                ", birthday=" + birthDate +
                 ", city='" + city + '\'' +
                 ", description='" + description + '\'' +
                 ", role=" + role +

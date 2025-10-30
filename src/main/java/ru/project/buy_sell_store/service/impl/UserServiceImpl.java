@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(userId);
         user.setEmail(userDTO.email());
         user.setLogin(userDTO.login());
-        user.setBirthday(userDTO.birthDate());
+        user.setBirthDate(userDTO.birthDate());
         user.setCity(userDTO.city());
         user.setDescription(userDTO.description());
         return userRepository.save(user);
