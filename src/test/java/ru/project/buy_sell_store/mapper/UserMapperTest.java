@@ -1,11 +1,10 @@
-package ru.project.buy_sell_store;
+package ru.project.buy_sell_store.mapper;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.project.buy_sell_store.dto.UserDTO;
 import ru.project.buy_sell_store.enums.RoleEnum;
-import ru.project.buy_sell_store.mapper.UserMapper;
 import ru.project.buy_sell_store.model.User;
 
 import java.util.Calendar;
