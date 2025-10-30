@@ -22,11 +22,24 @@ public class ProductUpdateDTO {
     @Positive(message = "Стоимость должна быть больше нуля")
     private Integer cost;
 
+
+
+
+
+
+
     /**
      * Получить имя
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Установить имя
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -37,9 +50,23 @@ public class ProductUpdateDTO {
     }
 
     /**
+     * Установить описание
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
      * Получить стоимость
      */
     public Integer getCost() {
         return cost;
+    }
+
+    /**
+     * Установить стоимость
+     */
+    public void setCost(Integer cost) {
+        this.cost = cost;
     }
 }
