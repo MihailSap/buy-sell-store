@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.LoginDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
+import ru.project.buy_sell_store.model.User;
 import ru.project.buy_sell_store.service.AuthService;
 import ru.project.buy_sell_store.service.impl.AuthServiceImpl;
 
@@ -53,7 +54,8 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@Validated @RequestBody LoginDTO loginDTO, HttpSession session){
         authService.login(loginDTO, session);
-        return String.format("С возвращением, %s!", loginDTO.getLogin());
+        User user = authService.getAuthenticatedUser();
+        return String.format("С возвращением, %s!", user.getLogin());
     }
 
     /**

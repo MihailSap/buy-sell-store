@@ -3,6 +3,7 @@ package ru.project.buy_sell_store.service;
 import jakarta.servlet.http.HttpSession;
 import ru.project.buy_sell_store.dto.LoginDTO;
 import ru.project.buy_sell_store.dto.RegisterDTO;
+import ru.project.buy_sell_store.model.User;
 
 /**
  * Интерфейс для сервиса, предоставляющего методы для работы с аутентификацией
@@ -24,4 +25,10 @@ public interface AuthService {
      * Выход пользователя из аккаунта
      */
     void logout(HttpSession session);
+
+    /**
+     * Получение авторизованного пользователя
+     * @return авторизованный пользователь
+     */
+    User getAuthenticatedUser();
 }
