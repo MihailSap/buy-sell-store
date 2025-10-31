@@ -26,7 +26,7 @@ public class ProductController {
     }
 
     /**
-     * Получение всех товаров
+     * Получение всех товаров, не считая архивных
      */
     @GetMapping
     public List<ProductDTO> findAll() {

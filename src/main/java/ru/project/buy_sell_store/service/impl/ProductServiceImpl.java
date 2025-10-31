@@ -7,6 +7,7 @@ import ru.project.buy_sell_store.repository.ProductRepository;
 import ru.project.buy_sell_store.service.ProductService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Севрис для управление сущности Товара
@@ -28,10 +29,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Получить все товары из базы данных
+     * Получить все товары из базы данных, исключая те, которые в архиве
+     *
      */
     public List<Product> findAll() {
-        return productRepository.findAll();
+        return productRepository.findAll().stream()
+                .filter(product -> !product.isArchived()).collect(Collectors.toList());
     }
 
     /**
