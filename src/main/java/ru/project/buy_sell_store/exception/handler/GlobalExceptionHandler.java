@@ -20,8 +20,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Обрабатывает, когда отсутсвует объект из базы данных
-     * @param ex
-     * @return
      */
     @ExceptionHandler(BuySellStoreNotFoundException.class)
     public ResponseEntity<ErrorDTO> handleNotFoundEx(BuySellStoreNotFoundException ex) {

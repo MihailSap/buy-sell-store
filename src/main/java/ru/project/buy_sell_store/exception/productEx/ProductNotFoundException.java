@@ -1,4 +1,4 @@
-package ru.project.buy_sell_store.exception.product;
+package ru.project.buy_sell_store.exception.productEx;
 
 import ru.project.buy_sell_store.exception.globalEx.BuySellStoreNotFoundException;
 
@@ -7,6 +7,6 @@ import ru.project.buy_sell_store.exception.globalEx.BuySellStoreNotFoundExceptio
  */
 public class ProductNotFoundException extends BuySellStoreNotFoundException {
     public ProductNotFoundException(Long id) {
-        super("Товар c id = " + id + " не найден");
+        super("Товар с id = " + id + " не найден");
     }
 }

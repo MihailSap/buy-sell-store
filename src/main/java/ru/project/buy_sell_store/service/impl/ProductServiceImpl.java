@@ -3,9 +3,9 @@ package ru.project.buy_sell_store.service.impl;
 import org.springframework.stereotype.Service;
 import ru.project.buy_sell_store.dto.ProductDTO;
 import ru.project.buy_sell_store.dto.ProductUpdateDTO;
-import ru.project.buy_sell_store.exception.product.ProductArchiveException;
-import ru.project.buy_sell_store.exception.product.ProductNotFoundException;
-import ru.project.buy_sell_store.exception.product.ProductRestoreException;
+import ru.project.buy_sell_store.exception.productEx.ProductArchiveException;
+import ru.project.buy_sell_store.exception.productEx.ProductNotFoundException;
+import ru.project.buy_sell_store.exception.productEx.ProductRestoreException;
 import ru.project.buy_sell_store.model.Product;
 import ru.project.buy_sell_store.repository.ProductRepository;
 import ru.project.buy_sell_store.service.ProductService;
@@ -63,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) {
+        findById(id);
         productRepository.deleteById(id);
     }
 

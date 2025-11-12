@@ -2,6 +2,8 @@ package ru.project.buy_sell_store.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 /**
  *  Cущность товара
  */
@@ -22,6 +24,13 @@ public class Product {
     private Integer cost;
 
     private boolean archived = false;
+
+    /**
+     * Установить id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
      * Получить id
@@ -98,5 +107,28 @@ public class Product {
      */
     public void setArchived(boolean archived) {
         this.archived = archived;
+    }
+
+    /**
+     * Переопределение equals со всеми полями
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return archived == product.archived && Objects.equals(id, product.id)
+                && Objects.equals(name, product.name) && Objects.equals(description, product.description)
+                && Objects.equals(category, product.category) && Objects.equals(cost, product.cost);
+    }
+
+    /**
+     * Переопределение hashCode со всеми полями
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, category, cost, archived);
     }
 }

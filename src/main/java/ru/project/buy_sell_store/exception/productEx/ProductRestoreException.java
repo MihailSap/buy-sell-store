@@ -1,4 +1,4 @@
-package ru.project.buy_sell_store.exception.product;
+package ru.project.buy_sell_store.exception.productEx;
 
 import ru.project.buy_sell_store.exception.globalEx.BuySellConflictException;
 
