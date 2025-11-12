@@ -1,0 +1,48 @@
+package ru.project.buySellStore.service;
+
+import ru.project.buySellStore.dto.ProductDTO;
+import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.model.Product;
+
+import java.util.List;
+
+/**
+ * Сервисный интерфейс для работы с сущностью Товара
+ */
+public interface ProductService {
+
+    /**
+     * Сохранить товар
+     */
+    Product save(ProductDTO productDto);
+
+    /**
+     * Получить все товары
+     */
+    List<Product> findAll();
+
+    /**
+     * Получить товар по id
+     */
+    Product findById(Long id);
+
+    /**
+     * Обновить товар по id
+     */
+    void update(Long id, ProductUpdateDTO updatedProductDto);
+
+    /**
+     * Удалить товар  по id
+     */
+    void delete(Long id);
+
+    /**
+     * Архивировать товар по id
+     */
+    void archive(Long id);
+
+    /**
+     * Восстановить из архива по id
+     */
+    void restore(Long id);
+}
