@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.project.buy_sell_store.dto.ErrorDTO;
-import ru.project.buy_sell_store.exception.globalEx.BuySellConflictException;
+import ru.project.buy_sell_store.exception.globalEx.BuySellStoreConflictException;
 import ru.project.buy_sell_store.exception.globalEx.BuySellStoreNotFoundException;
 
 import java.util.stream.Collectors;
@@ -29,8 +29,8 @@ public class GlobalExceptionHandler {
     /**
      * Обрабатывает конфликты
      */
-    @ExceptionHandler(BuySellConflictException.class)
-    public ResponseEntity<ErrorDTO> handleConflictEx(BuySellConflictException ex) {
+    @ExceptionHandler(BuySellStoreConflictException.class)
+    public ResponseEntity<ErrorDTO> handleConflictEx(BuySellStoreConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(ex.getMessage()));
     }
 
