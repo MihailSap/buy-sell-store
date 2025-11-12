@@ -2,6 +2,7 @@ package ru.project.buy_sell_store.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buy_sell_store.dto.ProductDTO;
 import ru.project.buy_sell_store.dto.ProductUpdateDTO;
@@ -14,12 +15,19 @@ import java.util.stream.Collectors;
 /**
  * Контроллер для управление Товара
  */
+@Transactional
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
     private final ProductMapper productMapper;
+
+    /**
+     * Создание контроллера с внедрением нужных зависимостей
+     * @param productService - сервис Товара
+     * @param productMapper - маппер Товара
+     */
     public ProductController(ProductService productService, ProductMapper productMapper) {
         this.productService = productService;
         this.productMapper = productMapper;
@@ -30,7 +38,8 @@ public class ProductController {
      */
     @GetMapping
     public List<ProductDTO> findAll() {
-        return productService.findAll().stream().map(productMapper::toDto)
+        return productService.findAll().stream()
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +49,7 @@ public class ProductController {
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody ProductDTO productDto) {
-        productService.save(productMapper.toEntity(productDto));
+        productService.save(productDto);
         return "Продукт создан!";
     }
 
@@ -58,7 +67,7 @@ public class ProductController {
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
                                             @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
-        productService.update(id, productMapper.toEntity(productUpdateDTO));
+        productService.update(id, productUpdateDTO);
         return "Продукт изменен!";
     }
 

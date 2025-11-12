@@ -30,6 +30,27 @@ public class ProductDTO {
     private Integer cost;
 
     /**
+     * Создание экземпляра со всеми полями
+     * @param name название
+     * @param description описание
+     * @param category категория
+     * @param cost цена
+     */
+    public ProductDTO(String name, String description, String category, Integer cost) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.cost = cost;
+    }
+
+    /**
+     * Создание экземпляра без полей
+     */
+    public ProductDTO() {
+
+    }
+
+    /**
      * Получить имя
      */
     public String getName() {

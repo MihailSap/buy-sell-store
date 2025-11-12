@@ -1,5 +1,7 @@
 package ru.project.buy_sell_store.service;
 
+import ru.project.buy_sell_store.dto.ProductDTO;
+import ru.project.buy_sell_store.dto.ProductUpdateDTO;
 import ru.project.buy_sell_store.model.Product;
 
 import java.util.List;
@@ -12,7 +14,7 @@ public interface ProductService {
     /**
      * Сохранить товар
      */
-    Product save(Product product);
+    Product save(ProductDTO productDto);
 
     /**
      * Получить все товары
@@ -27,7 +29,7 @@ public interface ProductService {
     /**
      * Обновить товар по id
      */
-    void update(Long id, Product updatedProduct);
+    void update(Long id, ProductUpdateDTO updatedProductDto);
 
     /**
      * Удалить товар  по id
@@ -44,4 +46,3 @@ public interface ProductService {
      */
     void restore(Long id);
 }
-
