@@ -23,21 +23,11 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
 @RequestMapping("/api/users")
 public class UserController {
 
-    /**
-     * Интерфейс для работы с {@link User}.
-     * Позволяет получать, редактировать и удалять профиль пользователя
-     */
+
     private final UserService userService;
 
-    /**
-     * Класс, содержащий методы для маппинга {@link User}
-     * Используется для маппинга {@link User} в {@link UserDTO}
-     */
     private final UserMapper userMapper;
 
-    /**
-     * Интерфейс, предоставляющий метод для выхода из аккаунта
-     */
     private final AuthService authService;
 
     /**

@@ -21,9 +21,6 @@ import ru.project.buySellStore.service.impl.AuthServiceImpl;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    /**
-     * Интерфейс, предоставляющий методы для работы с аутентификацией
-     */
     private final AuthService authService;
 
     /**
