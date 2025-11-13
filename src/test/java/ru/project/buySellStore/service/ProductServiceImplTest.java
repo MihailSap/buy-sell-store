@@ -2,11 +2,11 @@ package ru.project.buySellStore.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Тесты для проверки функционала ProductService
  */
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
 
     @Mock
