@@ -1,4 +1,4 @@
-package ru.project.buySellStore.exception.productEx;
+package ru.project.buySellStore.exception.userEx;
 
 import ru.project.buySellStore.exception.globalEx.BuySellStoreNotFoundException;
 

@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.RegisterDTO;
 import ru.project.buySellStore.dto.UserDTO;
-import ru.project.buySellStore.exception.productEx.UserNotFoundException;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.UserRepository;
 import ru.project.buySellStore.service.UserService;
