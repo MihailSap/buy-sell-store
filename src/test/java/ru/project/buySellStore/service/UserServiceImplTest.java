@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import ru.project.buySellStore.dto.RegisterDTO;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.UserRepository;
@@ -75,6 +77,19 @@ class UserServiceImplTest {
     }
 
     /**
+     * Тест на создание одинаковых {@link User}
+     * Ожидается исключение
+     */
+    @Test
+    void createUsersWithSameLogins(){
+        userService.create(registerDTO);
+        UserAlreadyExistsException exception = Assertions.assertThrows(UserAlreadyExistsException.class, () ->
+                userService.create(registerDTO)
+        );
+        Assertions.assertEquals("Пользователь с логином 'user' уже существует", exception.getMessage());
+    }
+
+    /**
      * Тест на получение {@link User} по id.
      * Проверяется получение существующего пользователя по id
      */
@@ -92,11 +107,11 @@ class UserServiceImplTest {
      */
     @Test
     void getUserByNotExistingIdTest() {
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () ->
+        UserNotFoundException exception = Assertions.assertThrows(UserNotFoundException.class, () ->
                 userService.getUserById(9999L)
         );
 
-        Assertions.assertEquals("Пользователь с таким id не найден", exception.getMessage());
+        Assertions.assertEquals("Пользователь с id = 9999 не найден", exception.getMessage());
     }
 
     /**

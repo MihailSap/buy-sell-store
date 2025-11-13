@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.RegisterDTO;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.UserRepository;
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(RegisterDTO registerDTO) {
         if(userRepository.existsByLogin(registerDTO.getLogin())){
-            throw new RuntimeException("Пользователь с таким логином уже существует");
+            throw new UserAlreadyExistsException(registerDTO.getLogin());
         }
 
         User user = new User();
