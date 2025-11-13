@@ -1,5 +1,7 @@
 package ru.project.buySellStore.exception.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,11 +20,14 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     /**
-     * Обрабатывает, когда отсутсвует объект из базы данных
+     * Обрабатывает, когда отсутствует объект из базы данных
      */
     @ExceptionHandler(BuySellStoreNotFoundException.class)
     public ResponseEntity<ErrorDTO> handleNotFoundEx(BuySellStoreNotFoundException ex) {
+        logger.error("NotFoundException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(ex.getMessage()));
     }
 
@@ -31,6 +36,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BuySellStoreConflictException.class)
     public ResponseEntity<ErrorDTO> handleConflictEx(BuySellStoreConflictException ex) {
+        logger.error("ConflictException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(ex.getMessage()));
     }
 
@@ -39,6 +45,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorDTO> handleNotFoundEx(NoResourceFoundException ex) {
+        logger.error("NoResourceFoundException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorDTO("Ресурс /%s не существует".formatted(ex.getResourcePath())));
     }
@@ -53,6 +60,7 @@ public class GlobalExceptionHandler {
                     String fieldName = fe.getField();
                     return fieldName + ": " + fe.getDefaultMessage();
                 }).collect(Collectors.joining(", ")));
+        logger.error("ValidationException: {}", description, ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(description));
     }
 
@@ -61,6 +69,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDTO> handleInternalServerEx(Exception ex) {
+        logger.error("Exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorDTO(ex.getMessage()));
     }

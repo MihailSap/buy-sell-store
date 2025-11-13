@@ -3,7 +3,7 @@ package ru.project.buySellStore.exception.productEx;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreConflictException;
 
 /**
- * Exception при повторного восстановления из архива
+ * Exception при повторном восстановления из архива
  */
 public class ProductRestoreException extends BuySellStoreConflictException {
     public ProductRestoreException(Long id) {
