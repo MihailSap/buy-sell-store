@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Тесты для проверки функционала ProductServiceImpl
+ * Тесты для проверки функционала ProductService
  */
 @SpringBootTest
 @Transactional
