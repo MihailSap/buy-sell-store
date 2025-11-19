@@ -18,7 +18,7 @@ public class ProductMapper {
                 product.getName(),
                 product.getDescription(),
                 product.getCategory(),
-                product.getCost()
+                product.getSupplierCost()
         );
     }
 }

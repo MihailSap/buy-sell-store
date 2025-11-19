@@ -32,7 +32,7 @@ public interface ProductService {
     void update(Long id, ProductUpdateDTO updatedProductDto);
 
     /**
-     * Удалить товар  по id
+     * Удалить товар по id
      */
     void delete(Long id);
 
@@ -45,4 +45,9 @@ public interface ProductService {
      * Восстановить из архива по id
      */
     void restore(Long id);
+
+    /**
+     * Назначить продавца на товар
+     */
+    void assignSeller(Long productId, Long sellerId);
 }

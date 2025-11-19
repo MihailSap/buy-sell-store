@@ -21,7 +21,11 @@ public class Product {
 
     private String category;
 
-    private Integer cost;
+    private Integer supplierCost;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private User seller;
 
     private boolean archived = false;
 
@@ -82,17 +86,17 @@ public class Product {
     }
 
     /**
-     * Получить стоимость
+     * Получить стоимость поставщика
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
-     * Установить стоимость
+     * Установить стоимость поставщика
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer cost) {
+        this.supplierCost = cost;
     }
 
     /**
@@ -110,6 +114,20 @@ public class Product {
     }
 
     /**
+     * Получить продавца данного товара
+     */
+    public User getSeller() {
+        return seller;
+    }
+
+    /**
+     * Установить продавца данного товара
+     */
+    public void setSeller(User seller) {
+        this.seller = seller;
+    }
+
+    /**
      * Переопределение equals со всеми полями
      * @param o
      * @return
@@ -120,7 +138,7 @@ public class Product {
         Product product = (Product) o;
         return archived == product.archived && Objects.equals(id, product.id)
                 && Objects.equals(name, product.name) && Objects.equals(description, product.description)
-                && Objects.equals(category, product.category) && Objects.equals(cost, product.cost);
+                && Objects.equals(category, product.category) && Objects.equals(supplierCost, product.supplierCost);
     }
 
     /**
@@ -129,6 +147,6 @@ public class Product {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, category, cost, archived);
+        return Objects.hash(id, name, description, category, supplierCost, archived);
     }
 }
