@@ -32,18 +32,18 @@ public class ProductController {
 
     private final AuthService authService;
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserServiceImpl userService;
 
     /**
      * Создание контроллера с внедрением нужных зависимостей
      * @param productService - сервис Товара
      * @param productMapper - маппер Товара
      */
-    public ProductController(ProductService productService, ProductMapper productMapper, AuthService authService, UserServiceImpl userServiceImpl) {
+    public ProductController(ProductService productService, ProductMapper productMapper, AuthService authService, UserServiceImpl userService) {
         this.productService = productService;
         this.productMapper = productMapper;
         this.authService = authService;
-        this.userServiceImpl = userServiceImpl;
+        this.userService = userService;
     }
 
     /**
@@ -86,7 +86,7 @@ public class ProductController {
      */
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
-                                            @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+                         @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException("Только поставщик может редактировать товар!");
@@ -146,7 +146,7 @@ public class ProductController {
         productService.assignSeller(productId, sellerId);
         return String.format(
                 "Продавец '%s' назначен на товар '%s'",
-                userServiceImpl.getUserById(sellerId).getLogin(),
+                userService.getUserById(sellerId).getLogin(),
                 productService.findById(productId).getName());
     }
 }

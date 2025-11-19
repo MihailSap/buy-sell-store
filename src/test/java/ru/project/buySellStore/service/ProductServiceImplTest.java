@@ -11,8 +11,10 @@ import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.impl.ProductServiceImpl;
+import ru.project.buySellStore.service.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +32,10 @@ class ProductServiceImplTest {
 
     @InjectMocks
     private ProductServiceImpl productService;
+
+    @Mock
+    private UserServiceImpl userService;
+
 
     /**
      * Проверяет нахождения товара, которого не существует
@@ -199,5 +205,30 @@ class ProductServiceImplTest {
         );
 
         Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    /**
+     * Проверяет назначение продавца на товар
+     */
+    @Test
+    void testAssignSeller(){
+        Product product = new Product();
+        product.setId(1L);
+
+        User seller = new User();
+        seller.setId(10L);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+        Mockito.when(productRepository.save(Mockito.any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(userService.getUserById(10L))
+                .thenReturn(seller);
+
+        productService.assignSeller(1L, 10L);
+
+        Assertions.assertEquals(seller, product.getSeller());
+        Mockito.verify(productRepository).save(product);
+        Mockito.verify(userService).getUserById(10L);
     }
 }

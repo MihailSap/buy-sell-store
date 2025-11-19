@@ -11,6 +11,13 @@ public class AssignSellerDTO {
     private Long sellerId;
 
     /**
+     * Конструктор
+     */
+    public AssignSellerDTO(Long sellerId) {
+        this.sellerId = sellerId;
+    }
+
+    /**
      * Определить id продавца
      */
     public Long getSellerId() {
