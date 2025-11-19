@@ -2,13 +2,15 @@ package ru.project.buySellStore.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
+import ru.project.buySellStore.model.Role;
+import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.ProductService;
 import ru.project.buySellStore.service.impl.UserServiceImpl;
@@ -58,9 +60,13 @@ public class ProductController {
      * Создание нового товара
      */
     @PostMapping("/add")
-    @PreAuthorize("hasRole('SUPPLIER')")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody ProductDTO productDto) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может создавать товар!");
+        }
+
         productService.save(productDto);
         return String.format(
                 "Поставщик '%s' создал товар '%s'",
@@ -79,9 +85,13 @@ public class ProductController {
      * Обновление товара по id
      */
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('SUPPLIER')")
     public String update(@PathVariable("id") Long id,
                                             @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может редактировать товар!");
+        }
+
         productService.update(id, productUpdateDTO);
         return "Продукт изменен!";
     }
@@ -89,11 +99,18 @@ public class ProductController {
     /**
      * Удаление товара по id
      */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SUPPLIER')")
-    public String delete(@PathVariable("id") Long id) {
-        productService.delete(id);
-        return "Продукт удален!";
+    @DeleteMapping("/{productId}")
+    public String delete(@PathVariable("productId") Long productId) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может удалять товар!");
+        }
+
+        String productName = productService.findById(productId).getName();
+        productService.delete(productId);
+        return String.format("Товар '%s' удален поставщиком '%s'",
+                productName,
+                authService.getAuthenticatedUser().getLogin());
     }
 
     /**
@@ -115,9 +132,16 @@ public class ProductController {
                 "Теперь другие пользователи снова могут просматривать и покупать его";
     }
 
+    /**
+     * Определение продавца для товара
+     */
     @PostMapping("/{productId}/assign-seller")
-    @PreAuthorize("hasRole('SUPPLIER')")
     public String assignSeller(@PathVariable("productId") Long productId, @RequestBody AssignSellerDTO assignSellerDTO){
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может назначать продавца на товар");
+        }
+
         Long sellerId = assignSellerDTO.getSellerId();
         productService.assignSeller(productId, sellerId);
         return String.format(
