@@ -1,4 +1,4 @@
-package ru.project.buy_sell_store.controller;
+package ru.project.buySellStore.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -11,11 +11,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.project.buy_sell_store.dto.ProductDTO;
-import ru.project.buy_sell_store.dto.ProductUpdateDTO;
-import ru.project.buy_sell_store.mapper.ProductMapper;
-import ru.project.buy_sell_store.model.Product;
-import ru.project.buy_sell_store.service.ProductService;
+import ru.project.buySellStore.dto.ProductDTO;
+import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.mapper.ProductMapper;
+import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.service.ProductService;
 
 import java.util.List;
 
