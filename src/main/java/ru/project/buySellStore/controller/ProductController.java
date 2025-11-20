@@ -9,6 +9,7 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
+import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
@@ -67,7 +68,7 @@ public class ProductController {
             throw new AccessDeniedException("Только поставщик может создавать товар!");
         }
 
-        productService.save(productDto);
+        productService.save(productDto, user);
         return String.format(
                 "Поставщик '%s' создал товар '%s'",
                 authService.getAuthenticatedUser().getLogin(), productDto.getName());
@@ -111,10 +112,14 @@ public class ProductController {
             throw new AccessDeniedException("Только поставщик может удалять товар!");
         }
 
-        String productName = productService.findById(productId).getName();
+        Product product = productService.findById(productId);
+        if(!user.equals(product.getSupplier())) {
+            throw new AccessDeniedException("Поставщик может удалять только свой товар!");
+        }
+
         productService.delete(productId);
         return String.format("Товар '%s' удален поставщиком '%s'",
-                productName,
+                product.getName(),
                 authService.getAuthenticatedUser().getLogin());
     }
 
@@ -141,18 +146,27 @@ public class ProductController {
      * Определение продавца для товара
      */
     @PostMapping("/{productId}/assign-seller")
-    public String assignSeller(@PathVariable("productId") Long productId, @RequestBody AssignSellerDTO assignSellerDTO){
+    public String assignSeller(
+            @PathVariable("productId") Long productId,
+            @RequestBody AssignSellerDTO assignSellerDTO){
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
-            throw new AccessDeniedException("Только поставщик может назначать продавца на товар");
+            throw new AccessDeniedException(
+                    "Только поставщик может назначать продавца на товар");
         }
 
-        Long sellerId = assignSellerDTO.getSellerId();
-        productService.assignSeller(productId, sellerId);
+        User seller = userService.getUserById(assignSellerDTO.getSellerId());
+        Product product = productService.findById(productId);
+        if(!user.equals(product.getSupplier())){
+            throw new AccessDeniedException(
+                    "Поставщик может назначать продавцов только на свои товары");
+        }
+
+        productService.assignSeller(product, seller);
         return String.format(
                 "Продавец '%s' назначен на товар '%s'",
-                userService.getUserById(sellerId).getLogin(),
-                productService.findById(productId).getName());
+                seller.getLogin(),
+                product.getName());
     }
 
     @PostMapping("/{id}/buy")

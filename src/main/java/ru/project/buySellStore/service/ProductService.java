@@ -15,7 +15,7 @@ public interface ProductService {
     /**
      * Сохранить товар
      */
-    Product save(ProductDTO productDto);
+    Product save(ProductDTO productDto, User user);
 
     /**
      * Получить все товары
@@ -51,7 +51,7 @@ public interface ProductService {
     /**
      * Назначить продавца на товар
      */
-    void assignSeller(Long productId, Long sellerId);
+    void assignSeller(Product product, User seller);
 
     /**
      * Покупка товара

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
@@ -32,12 +34,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(ProductDTO productDto) {
+    public Product save(ProductDTO productDto, User supplier) {
         Product product = new Product();
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setCategory(productDto.getCategory());
         product.setSupplierCost(productDto.getSupplierCost());
+        product.setSupplier(supplier);
         return productRepository.save(product);
     }
 
@@ -99,9 +102,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void assignSeller(Long productId, Long sellerId){
-        Product product = findById(productId);
-        User seller = userServiceImpl.getUserById(sellerId);
+    public void assignSeller(Product product, User seller){
+        if(!seller.getRole().equals(Role.SELLER)) {
+            throw new UserNotSuitableRoleException(
+                    "Поставщиком можно назначить только пользователя с ролью SELLER");
+        }
+
         product.setSeller(seller);
         productRepository.save(product);
     }
