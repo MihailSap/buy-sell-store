@@ -4,6 +4,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
@@ -57,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+    public void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
                        User seller) {
         Product product = findById(id);
 
@@ -67,6 +68,28 @@ public class ProductServiceImpl implements ProductService {
 
         product.setDescription(productSellerUpdateDTO.getDescription());
         product.setSellerCost(productSellerUpdateDTO.getSellerCost());
+
+        productRepository.save(product);
+    }
+
+    @Override
+    public void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO
+            ,User supplier) {
+        Product product = findById(id);
+
+        if (!product.getSupplier().equals(supplier)) {
+            throw new AccessDeniedException("Поставщик может изменять только свои товары!");
+        }
+
+        if (product.getSeller() != null) {
+            throw new AccessDeniedException(
+                    "Поставщик не может редактировать товар после назначения продавца!"
+            );
+        }
+
+        product.setName(productSupplierUpdateDTO.getName());
+        product.setDescription(productSupplierUpdateDTO.getDescription());
+        product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
 
         productRepository.save(product);
     }

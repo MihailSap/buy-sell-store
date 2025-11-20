@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -83,10 +84,10 @@ public class ProductController {
     }
 
     /**
-     * Обновление товара по id
+     * Обновление товара по id Продавцу
      */
-    @PatchMapping("/{id}")
-    public String update(@PathVariable("id") Long id,
+    @PatchMapping("/{id}/seller")
+    public String updateBySeller(@PathVariable("id") Long id,
                          @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO) {
         User user = authService.getAuthenticatedUser();
 
@@ -99,6 +100,29 @@ public class ProductController {
         return String.format(
                 "Продавец '%s' изменил стоимость и описание товара '%s'!",
                 user.getLogin(), productService.findById(id).getName()
+        );
+    }
+
+    /**
+     * Обновление товара по id Поставщику
+     */
+    @PatchMapping("/{id}/supplier")
+    public String updateBySupplier(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO) {
+
+        User supplier = authService.getAuthenticatedUser();
+
+        if (!supplier.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может редактировать товар!");
+        }
+
+        productService.updateBySupplier(id, productSupplierUpdateDTO, supplier);
+
+        return String.format(
+                "Поставщик '%s' изменил товар '%s'",
+                supplier.getLogin(),
+                productSupplierUpdateDTO.getName()
         );
     }
 

@@ -2,6 +2,7 @@ package ru.project.buySellStore.service;
 
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 
@@ -30,7 +31,7 @@ public interface ProductService {
     /**
      * Продавец обновляет товар по id
      */
-    void update(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+    void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
                        User seller);
 
     /**
@@ -57,4 +58,11 @@ public interface ProductService {
      * Покупка товара
      */
     void buyProduct(Long id, User buyer);
+
+    /**
+     * Поставщик меняет товар по id. Он имеет эту возможность до того как
+     * назначил продавца
+     */
+    void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO,
+                          User supplier);
 }

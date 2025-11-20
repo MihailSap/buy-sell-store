@@ -51,6 +51,8 @@ class ProductControllerTest {
 
     private User sellerUser;
 
+    private User buyerUser;
+
     private Product product;
 
     private ProductDTO productDTO;
@@ -67,6 +69,10 @@ class ProductControllerTest {
         sellerUser = new User();
         sellerUser.setLogin("seller-user");
         sellerUser.setRole(Role.SELLER);
+
+        buyerUser = new User();
+        buyerUser.setLogin("buyer-user");
+        buyerUser.setRole(Role.BUYER);
 
         product = new Product();
         product.setId(1L);
@@ -309,5 +315,95 @@ class ProductControllerTest {
                         .value("Только поставщик может назначать продавца на товар"));
         Mockito.verify(productService, Mockito.never())
                 .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
+    }
+
+    /**
+     * Проверяет успешное обновление товара продавцом
+     */
+    @Test
+    void testUpdateBySeller() throws Exception {
+        ProductSellerUpdateDTO updateDTO =
+                new ProductSellerUpdateDTO();
+
+        updateDTO.setDescription("description");
+        updateDTO.setSellerCost(1000);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(sellerUser);
+
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("Продавец 'seller-user' изменил стоимость и описание товара 'name'!"));
+
+        Mockito.verify(productService, Mockito.times(1))
+                .update(Mockito.eq(1L), Mockito.any(ProductSellerUpdateDTO.class), Mockito.eq(sellerUser));
+    }
+
+    /**
+     * Проверяет обновление товара НЕ продавцом
+     */
+    @Test
+    void testUpdateByNonSeller() throws Exception {
+        ProductSellerUpdateDTO updateDTO =
+                new ProductSellerUpdateDTO();
+
+        updateDTO.setDescription("description");
+        updateDTO.setSellerCost(1000);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Только продавец может менять описание и цену!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .update(Mockito.anyLong(), Mockito.any(), Mockito.any());
+    }
+
+    /**
+     * Проверяет успешную покупку товара покупателем
+     */
+    @Test
+    void testBuyByBuyer() throws Exception {
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/buy"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("Покупатель 'buyer-user' купил товар 'name'"));
+
+        Mockito.verify(productService, Mockito.times(1))
+                .buyProduct(1L, buyerUser);
+    }
+
+    /**
+     * Проверяет покупку товара НЕ покупателем
+     */
+    @Test
+    void testBuyByNonBuyer() throws Exception {
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(sellerUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/buy"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Покупать товары может только покупатель!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .buyProduct(Mockito.anyLong(), Mockito.any());
     }
 }

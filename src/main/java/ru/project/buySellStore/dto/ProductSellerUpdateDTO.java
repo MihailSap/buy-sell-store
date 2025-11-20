@@ -3,7 +3,7 @@ package ru.project.buySellStore.dto;
 import jakarta.validation.constraints.*;
 
 /**
- * DTO для обновления товара
+ * DTO для обновления товара Продавцу
  */
 public class ProductSellerUpdateDTO {
 
