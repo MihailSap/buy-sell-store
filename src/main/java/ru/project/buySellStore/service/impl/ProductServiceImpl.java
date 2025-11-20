@@ -1,16 +1,14 @@
 package ru.project.buySellStore.service.impl;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductArchiveException;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
-import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,11 +54,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void update(Long id, ProductUpdateDTO updatedProductDto) {
+    public void update(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+                       User seller) {
         Product product = findById(id);
-        product.setName(updatedProductDto.getName());
-        product.setDescription(updatedProductDto.getDescription());
-        product.setSupplierCost(updatedProductDto.getSupplierCost());
+
+        if (product.getSeller() == null || !product.getSeller().equals(seller)) {
+            throw new AccessDeniedException("Этот товар не назначен вам!");
+        }
+
+        product.setDescription(productSellerUpdateDTO.getDescription());
+        product.setSellerCost(productSellerUpdateDTO.getSellerCost());
 
         productRepository.save(product);
     }
@@ -100,6 +103,27 @@ public class ProductServiceImpl implements ProductService {
         Product product = findById(productId);
         User seller = userServiceImpl.getUserById(sellerId);
         product.setSeller(seller);
+        productRepository.save(product);
+    }
+
+    @Override
+    public void buyProduct(Long id, User buyer) {
+        Product product = findById(id);
+
+        if (product.isArchived()) {
+            throw new ProductArchiveException(id);
+        }
+
+        if (product.getSeller() == null) {
+            throw new ProductWithoutSellerException(id);
+        }
+
+        if (product.getBuyer() != null) {
+            throw new ProductAlreadyBoughtException(id);
+        }
+
+        product.setBuyer(buyer);
+
         productRepository.save(product);
     }
 }

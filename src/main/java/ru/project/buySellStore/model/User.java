@@ -67,10 +67,25 @@ public class User {
     private Role role;
 
     /**
-     * Товары, которые может продавать продавец
+     * <b>Товары поставщика</b>
+     * <p>Список товаров, которые поставщик создал</p>
+     */
+    @OneToMany(mappedBy = "supplier")
+    private Set<Product> suppliedProducts = new HashSet<>();
+
+    /**
+     * <b>Товары продавца</b>
+     * <p>Список товаров, которые продавец продает</p>
      */
     @OneToMany(mappedBy = "seller")
-    private Set<Product> products = new HashSet<>();
+    private Set<Product> sellingProducts = new HashSet<>();
+
+    /**
+     * <b>Товары покупателя</b>
+     * <p>Список товаров, которые покупатель купил</p>
+     */
+    @OneToMany(mappedBy = "buyer")
+    private Set<Product> boughtProducts = new HashSet<>();
 
     /**
      * Конструктор
@@ -204,20 +219,6 @@ public class User {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * Метод получения товаров продавца
-     */
-    public Set<Product> getProducts() {
-        return products;
-    }
-
-    /**
-     * Метод определения товаров продавца
-     */
-    public void setProducts(Set<Product> products) {
-        this.products = products;
     }
 
     /**

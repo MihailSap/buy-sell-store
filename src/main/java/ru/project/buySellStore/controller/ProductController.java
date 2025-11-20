@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
@@ -86,14 +86,19 @@ public class ProductController {
      */
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
-                         @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+                         @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO) {
         User user = authService.getAuthenticatedUser();
-        if(!user.getRole().equals(Role.SUPPLIER)) {
-            throw new AccessDeniedException("Только поставщик может редактировать товар!");
+
+        if (!user.getRole().equals(Role.SELLER)) {
+            throw new AccessDeniedException("Только продавец может менять описание и цену!");
         }
 
-        productService.update(id, productUpdateDTO);
-        return "Продукт изменен!";
+        productService.update(id, productUpdateSellerDTO, user);
+
+        return String.format(
+                "Продавец '%s' изменил стоимость и описание товара '%s'!",
+                user.getLogin(), productService.findById(id).getName()
+        );
     }
 
     /**
@@ -148,5 +153,23 @@ public class ProductController {
                 "Продавец '%s' назначен на товар '%s'",
                 userService.getUserById(sellerId).getLogin(),
                 productService.findById(productId).getName());
+    }
+
+    @PostMapping("/{id}/buy")
+    public String buy(@PathVariable("id") Long id) {
+
+        User buyer = authService.getAuthenticatedUser();
+
+        if (!buyer.getRole().equals(Role.BUYER)) {
+            throw new AccessDeniedException("Покупать товары может только покупатель!");
+        }
+
+        productService.buyProduct(id, buyer);
+
+        return String.format(
+                "Покупатель '%s' купил товар '%s'",
+                buyer.getLogin(),
+                productService.findById(id).getName()
+        );
     }
 }

@@ -23,9 +23,19 @@ public class Product {
 
     private Integer supplierCost;
 
+    private Integer sellerCost;
+
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
+
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private User supplier;
+
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
 
     private boolean archived = false;
 
@@ -128,6 +138,49 @@ public class Product {
     }
 
     /**
+     * Получить поставщика
+     */
+    public User getSupplier() {
+        return supplier;
+    }
+
+    /**
+     * Установить поставщика
+     */
+    public void setSupplier(User supplier) {
+        this.supplier = supplier;
+    }
+
+    /**
+     * Получить покупателя
+     */
+    public User getBuyer() {
+        return buyer;
+    }
+
+    /**
+     * Установить покупателя
+     * @param buyer
+     */
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
+    }
+
+    /**
+     * Получить стоимость продавца
+     */
+    public Integer getSellerCost() {
+        return sellerCost;
+    }
+
+    /**
+     * Установить стоимость продавца
+     */
+    public void setSellerCost(Integer sellerCost) {
+        this.sellerCost = sellerCost;
+    }
+
+    /**
      * Переопределение equals со всеми полями
      * @param o
      * @return
@@ -138,7 +191,8 @@ public class Product {
         Product product = (Product) o;
         return archived == product.archived && Objects.equals(id, product.id)
                 && Objects.equals(name, product.name) && Objects.equals(description, product.description)
-                && Objects.equals(category, product.category) && Objects.equals(supplierCost, product.supplierCost);
+                && Objects.equals(category, product.category) && Objects.equals(supplierCost, product.supplierCost)
+                && Objects.equals(seller, product.seller) && Objects.equals(sellerCost, product.sellerCost);
     }
 
     /**
@@ -147,6 +201,7 @@ public class Product {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, category, supplierCost, archived);
+        return Objects.hash(id, name, description, category, supplierCost, archived,
+                seller, sellerCost);
     }
 }
