@@ -1,5 +1,6 @@
 package ru.project.buySellStore.exception.handler;
 
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import ru.project.buySellStore.dto.ErrorDTO;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreConflictException;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreException;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreNotFoundException;
+import ru.project.buySellStore.exception.globalEx.BuySellStoreNotSuitableRoleException;
 
 import java.util.stream.Collectors;
 
@@ -40,6 +42,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDTO> handleConflictEx(BuySellStoreConflictException ex) {
         logger.error("ConflictException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(ex.getMessage()));
+    }
+
+    @ExceptionHandler(BuySellStoreNotSuitableRoleException.class)
+    public ResponseEntity<ErrorDTO> handleNotSuitableRoleEx(BuySellStoreNotSuitableRoleException ex) {
+        logger.error("NotSuitableRoleException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorDTO(ex.getMessage()));
     }
 
     /**
