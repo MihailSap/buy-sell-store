@@ -95,7 +95,7 @@ public class ProductController {
             throw new AccessDeniedException("Только продавец может менять описание и цену!");
         }
 
-        productService.update(id, productUpdateSellerDTO, user);
+        productService.updateBySeller(id, productUpdateSellerDTO, user);
 
         return String.format(
                 "Продавец '%s' изменил стоимость и описание товара '%s'!",

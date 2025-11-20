@@ -253,7 +253,7 @@ class ProductServiceImplTest {
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        productService.update(1L, dto, seller);
+        productService.updateBySeller(1L, dto, seller);
 
         Assertions.assertEquals("New description", product.getDescription());
         Assertions.assertEquals(1000, product.getSellerCost());
@@ -287,7 +287,7 @@ class ProductServiceImplTest {
 
         AccessDeniedException ex = Assertions.assertThrows(
                 AccessDeniedException.class,
-                () -> productService.update(1L, dto, otherSeller)
+                () -> productService.updateBySeller(1L, dto, otherSeller)
         );
 
         Assertions.assertEquals("Этот товар не назначен вам!", ex.getMessage());

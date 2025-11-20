@@ -342,7 +342,7 @@ class ProductControllerTest {
                         .string("Продавец 'seller-user' изменил стоимость и описание товара 'name'!"));
 
         Mockito.verify(productService, Mockito.times(1))
-                .update(Mockito.eq(1L), Mockito.any(ProductSellerUpdateDTO.class), Mockito.eq(sellerUser));
+                .updateBySeller(Mockito.eq(1L), Mockito.any(ProductSellerUpdateDTO.class), Mockito.eq(sellerUser));
     }
 
     /**
@@ -367,7 +367,7 @@ class ProductControllerTest {
                         .value("Только продавец может менять описание и цену!"));
 
         Mockito.verify(productService, Mockito.never())
-                .update(Mockito.anyLong(), Mockito.any(), Mockito.any());
+                .updateBySeller(Mockito.anyLong(), Mockito.any(), Mockito.any());
     }
 
     /**
