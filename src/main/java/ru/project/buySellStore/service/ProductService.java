@@ -1,8 +1,9 @@
 package ru.project.buySellStore.service;
 
 import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.User;
 
 import java.util.List;
 
@@ -27,9 +28,10 @@ public interface ProductService {
     Product findById(Long id);
 
     /**
-     * Обновить товар по id
+     * Продавец обновляет товар по id
      */
-    void update(Long id, ProductUpdateDTO updatedProductDto);
+    void update(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+                       User seller);
 
     /**
      * Удалить товар по id
@@ -50,4 +52,9 @@ public interface ProductService {
      * Назначить продавца на товар
      */
     void assignSeller(Long productId, Long sellerId);
+
+    /**
+     * Покупка товара
+     */
+    void buyProduct(Long id, User buyer);
 }

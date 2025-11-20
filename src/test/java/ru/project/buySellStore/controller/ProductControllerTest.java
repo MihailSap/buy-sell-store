@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -193,7 +193,7 @@ class ProductControllerTest {
      */
     @Test
     void testUpdateBySupplier() throws Exception {
-        ProductUpdateDTO updateDTO = new ProductUpdateDTO();
+        ProductSellerUpdateDTO updateDTO = new ProductSellerUpdateDTO();
         updateDTO.setName("Updated name");
         updateDTO.setDescription("Updated desc");
         updateDTO.setSupplierCost(1500);
@@ -209,7 +209,7 @@ class ProductControllerTest {
                             .string("Продукт изменен!"));
 
         Mockito.verify(productService, Mockito.times(1))
-                .update(Mockito.eq(1L), Mockito.any(ProductUpdateDTO.class));
+                .update(Mockito.eq(1L), Mockito.any(ProductSellerUpdateDTO.class));
     }
 
     /**
@@ -218,7 +218,7 @@ class ProductControllerTest {
      */
     @Test
     void testUpdateBySeller() throws Exception {
-        ProductUpdateDTO updateDTO = new ProductUpdateDTO();
+        ProductSellerUpdateDTO updateDTO = new ProductSellerUpdateDTO();
         updateDTO.setName("Updated name");
         updateDTO.setDescription("Updated desc");
         updateDTO.setSupplierCost(1500);
@@ -234,7 +234,7 @@ class ProductControllerTest {
                         .value("Только поставщик может редактировать товар!"));
 
         Mockito.verify(productService, Mockito.never())
-                .update(Mockito.anyLong(), Mockito.any(ProductUpdateDTO.class));
+                .update(Mockito.anyLong(), Mockito.any(ProductSellerUpdateDTO.class));
     }
 
     /**
