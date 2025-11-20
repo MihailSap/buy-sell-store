@@ -20,7 +20,7 @@ public class ProductUpdateDTO {
 
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
-    private Integer cost;
+    private Integer supplierCost;
 
     /**
      * Получить имя
@@ -53,14 +53,14 @@ public class ProductUpdateDTO {
     /**
      * Получить стоимость
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
      * Установить стоимость
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer supplierCost) {
+        this.supplierCost = supplierCost;
     }
 }

@@ -3,7 +3,9 @@ package ru.project.buySellStore.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * <b>Сущность пользователя</b>
@@ -63,6 +65,12 @@ public class User {
      */
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    /**
+     * Товары, которые может продавать продавец
+     */
+    @OneToMany(mappedBy = "seller")
+    private Set<Product> products = new HashSet<>();
 
     /**
      * Конструктор
@@ -196,6 +204,20 @@ public class User {
      */
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    /**
+     * Метод получения товаров продавца
+     */
+    public Set<Product> getProducts() {
+        return products;
+    }
+
+    /**
+     * Метод определения товаров продавца
+     */
+    public void setProducts(Set<Product> products) {
+        this.products = products;
     }
 
     /**

@@ -21,7 +21,7 @@ class ProductMapperTest {
         product.setName("Футболка Puma");
         product.setDescription("Комфортная");
         product.setCategory("CLOTHES");
-        product.setCost(2799);
+        product.setSupplierCost(2799);
 
         ProductDTO dto = productMapper.toDto(product);
 
@@ -29,6 +29,6 @@ class ProductMapperTest {
         Assertions.assertEquals(product.getName(), dto.getName());
         Assertions.assertEquals(product.getDescription(), dto.getDescription());
         Assertions.assertEquals(product.getCategory(), dto.getCategory());
-        Assertions.assertEquals(product.getCost(), dto.getCost());
+        Assertions.assertEquals(product.getSupplierCost(), dto.getSupplierCost());
     }
 }

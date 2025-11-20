@@ -7,6 +7,7 @@ import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
 
@@ -21,12 +22,15 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
+    private final UserServiceImpl userServiceImpl;
+
     /**
      * Создание экземпляра с внедрением нужных зависимостей
      * @param productRepository репозиторий для работы с сущностью Товара
      */
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, UserServiceImpl userServiceImpl) {
         this.productRepository = productRepository;
+        this.userServiceImpl = userServiceImpl;
     }
 
     @Override
@@ -35,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setCategory(productDto.getCategory());
-        product.setCost(productDto.getCost());
+        product.setSupplierCost(productDto.getSupplierCost());
         return productRepository.save(product);
     }
 
@@ -56,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = findById(id);
         product.setName(updatedProductDto.getName());
         product.setDescription(updatedProductDto.getDescription());
-        product.setCost(updatedProductDto.getCost());
+        product.setSupplierCost(updatedProductDto.getSupplierCost());
 
         productRepository.save(product);
     }
@@ -88,6 +92,14 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product.setArchived(false);
+        productRepository.save(product);
+    }
+
+    @Override
+    public void assignSeller(Long productId, Long sellerId){
+        Product product = findById(productId);
+        User seller = userServiceImpl.getUserById(sellerId);
+        product.setSeller(seller);
         productRepository.save(product);
     }
 }

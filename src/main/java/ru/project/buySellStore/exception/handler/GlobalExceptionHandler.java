@@ -4,12 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.project.buySellStore.dto.ErrorDTO;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreConflictException;
+import ru.project.buySellStore.exception.globalEx.BuySellStoreException;
 import ru.project.buySellStore.exception.globalEx.BuySellStoreNotFoundException;
 
 import java.util.stream.Collectors;
@@ -38,6 +40,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDTO> handleConflictEx(BuySellStoreConflictException ex) {
         logger.error("ConflictException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(ex.getMessage()));
+    }
+
+    /**
+     * Обрабатывает ситуации, когда доступ запрещен
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDTO> handleAccessDeniedEx(AccessDeniedException ex){
+        logger.error("AccessDeniedException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorDTO(ex.getMessage()));
     }
 
     /**

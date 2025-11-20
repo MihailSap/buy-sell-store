@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v2_update_users.yaml
   - include:
       file: db/changelog/changeset/v3_update_users_birth_date.yaml
+  - include:
+      file: db/changelog/changeset/v4_add_seller_id_to_product.yaml

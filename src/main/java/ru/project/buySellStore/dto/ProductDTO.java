@@ -27,20 +27,20 @@ public class ProductDTO {
 
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
-    private Integer cost;
+    private Integer supplierCost;
 
     /**
      * Создание экземпляра со всеми полями
      * @param name название
      * @param description описание
      * @param category категория
-     * @param cost цена
+     * @param supplierCost цена
      */
-    public ProductDTO(String name, String description, String category, Integer cost) {
+    public ProductDTO(String name, String description, String category, Integer supplierCost) {
         this.name = name;
         this.description = description;
         this.category = category;
-        this.cost = cost;
+        this.supplierCost = supplierCost;
     }
 
     /**
@@ -95,14 +95,14 @@ public class ProductDTO {
     /**
      * Получить стоимость
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
      * Установить стоимость
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer supplierCost) {
+        this.supplierCost = supplierCost;
     }
 }

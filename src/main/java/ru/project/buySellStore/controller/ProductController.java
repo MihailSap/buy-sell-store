@@ -2,12 +2,18 @@ package ru.project.buySellStore.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
+import ru.project.buySellStore.model.Role;
+import ru.project.buySellStore.model.User;
+import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.ProductService;
+import ru.project.buySellStore.service.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,16 +27,23 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     private final ProductService productService;
+
     private final ProductMapper productMapper;
+
+    private final AuthService authService;
+
+    private final UserServiceImpl userService;
 
     /**
      * Создание контроллера с внедрением нужных зависимостей
      * @param productService - сервис Товара
      * @param productMapper - маппер Товара
      */
-    public ProductController(ProductService productService, ProductMapper productMapper) {
+    public ProductController(ProductService productService, ProductMapper productMapper, AuthService authService, UserServiceImpl userService) {
         this.productService = productService;
         this.productMapper = productMapper;
+        this.authService = authService;
+        this.userService = userService;
     }
 
     /**
@@ -49,8 +62,15 @@ public class ProductController {
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody ProductDTO productDto) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может создавать товар!");
+        }
+
         productService.save(productDto);
-        return "Продукт создан!";
+        return String.format(
+                "Поставщик '%s' создал товар '%s'",
+                authService.getAuthenticatedUser().getLogin(), productDto.getName());
     }
 
     /**
@@ -66,7 +86,12 @@ public class ProductController {
      */
     @PatchMapping("/{id}")
     public String update(@PathVariable("id") Long id,
-                                            @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+                         @Valid @RequestBody ProductUpdateDTO productUpdateDTO) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может редактировать товар!");
+        }
+
         productService.update(id, productUpdateDTO);
         return "Продукт изменен!";
     }
@@ -74,10 +99,18 @@ public class ProductController {
     /**
      * Удаление товара по id
      */
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") Long id) {
-        productService.delete(id);
-        return "Продукт удален!";
+    @DeleteMapping("/{productId}")
+    public String delete(@PathVariable("productId") Long productId) {
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может удалять товар!");
+        }
+
+        String productName = productService.findById(productId).getName();
+        productService.delete(productId);
+        return String.format("Товар '%s' удален поставщиком '%s'",
+                productName,
+                authService.getAuthenticatedUser().getLogin());
     }
 
     /**
@@ -97,5 +130,23 @@ public class ProductController {
         productService.restore(id);
         return "Ваш товар вернулся в открытый доступ. " +
                 "Теперь другие пользователи снова могут просматривать и покупать его";
+    }
+
+    /**
+     * Определение продавца для товара
+     */
+    @PostMapping("/{productId}/assign-seller")
+    public String assignSeller(@PathVariable("productId") Long productId, @RequestBody AssignSellerDTO assignSellerDTO){
+        User user = authService.getAuthenticatedUser();
+        if(!user.getRole().equals(Role.SUPPLIER)) {
+            throw new AccessDeniedException("Только поставщик может назначать продавца на товар");
+        }
+
+        Long sellerId = assignSellerDTO.getSellerId();
+        productService.assignSeller(productId, sellerId);
+        return String.format(
+                "Продавец '%s' назначен на товар '%s'",
+                userService.getUserById(sellerId).getLogin(),
+                productService.findById(productId).getName());
     }
 }
