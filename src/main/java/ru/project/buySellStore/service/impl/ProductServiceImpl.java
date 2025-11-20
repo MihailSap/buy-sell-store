@@ -105,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
     public void assignSeller(Product product, User seller){
         if(!seller.getRole().equals(Role.SELLER)) {
             throw new UserNotSuitableRoleException(
-                    "Поставщиком можно назначить только пользователя с ролью SELLER");
+                    "Продавцом можно назначить только пользователя с ролью SELLER");
         }
 
         product.setSeller(seller);
