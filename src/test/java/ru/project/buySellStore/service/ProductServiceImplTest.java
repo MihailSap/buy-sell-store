@@ -1,17 +1,16 @@
 package ru.project.buySellStore.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.access.AccessDeniedException;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductArchiveException;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
-import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
@@ -24,7 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Тесты для проверки функционала ProductService
+ * Тесты для проверки функционала {@link ProductServiceImpl}
  */
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
@@ -35,13 +34,26 @@ class ProductServiceImplTest {
     @InjectMocks
     private ProductServiceImpl productService;
 
-    @Mock
-    private UserServiceImpl userService;
+    private User buyer;
+
+    private Product product;
+
+    /**
+     * Явное создание сущностей для тестов
+     */
+    @BeforeEach
+    void setUp(){
+        buyer = new User();
+        buyer.setRole(Role.BUYER);
+
+        product = new Product();
+        product.setId(1L);
+    }
 
     /**
      * Проверяет нахождения товара, которого не существует
      *
-     * Ожидается, что сохранненый товар можно найти
+     * Ожидается, что сохраненный товар можно найти
      */
     @Test
     void findByIdTest() {
@@ -60,9 +72,6 @@ class ProductServiceImplTest {
      */
     @Test
     void findAllTest() {
-        Product product = new Product();
-        product.setId(1L);
-
         Product productArchive = new Product();
         productArchive.setId(2L);
         productArchive.setArchived(true);
@@ -113,19 +122,14 @@ class ProductServiceImplTest {
      */
     @Test
     void archiveTest() {
-        Product product = new Product();
-        product.setId(1L);
-
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
-
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         productService.archive(1L);
 
         Assertions.assertTrue(product.isArchived());
-
         Mockito.verify(productRepository)
                 .save(product);
     }
@@ -137,8 +141,6 @@ class ProductServiceImplTest {
      */
     @Test
     void archiveArchivedProductTest() {
-        Product product = new Product();
-        product.setId(1L);
         product.setArchived(true);
 
         Mockito.when(productRepository.findById(1L))
@@ -153,7 +155,6 @@ class ProductServiceImplTest {
                 "Товар с id = 1 находится уже в архиве",
                 ex.getMessage()
         );
-
         Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
     }
 
@@ -164,20 +165,16 @@ class ProductServiceImplTest {
      */
     @Test
     void restoreTest() {
-        Product product = new Product();
-        product.setId(1L);
         product.setArchived(true);
 
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
-
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         productService.restore(1L);
 
         Assertions.assertFalse(product.isArchived());
-
         Mockito.verify(productRepository)
                 .save(product);
     }
@@ -189,9 +186,6 @@ class ProductServiceImplTest {
      */
     @Test
     void restoreNoArchivedProductTest() {
-        Product product = new Product();
-        product.setId(1L);
-
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
 
@@ -213,12 +207,8 @@ class ProductServiceImplTest {
      */
     @Test
     void testAssignSeller(){
-        Product product = new Product();
-        product.setId(1L);
-
         User seller = new User();
         seller.setRole(Role.SELLER);
-        seller.setId(10L);
 
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -230,15 +220,30 @@ class ProductServiceImplTest {
     }
 
     /**
+     * Проверяет попытку назначить продавцом пользователя без роли SELLER
+     */
+    @Test
+    void testAssignSellerNotSeller(){
+        User seller = new User();
+        seller.setRole(Role.SUPPLIER);
+
+        UserNotSuitableRoleException ex = Assertions.assertThrows(
+                UserNotSuitableRoleException.class,
+                () -> productService.assignSeller(product, seller)
+        );
+
+        Assertions.assertEquals(
+                "Продавцом можно назначить только пользователя с ролью SELLER",
+                ex.getMessage()
+        );
+    }
+
+    /**
      * Проверяет успешное обновление товара продавцом
      */
     @Test
     void testUpdateSeller() {
-        Product product = new Product();
-        product.setId(1L);
-
         User seller = new User();
-        seller.setId(10L);
         seller.setRole(Role.SELLER);
 
         product.setSeller(seller);
@@ -247,51 +252,94 @@ class ProductServiceImplTest {
         dto.setDescription("New description");
         dto.setSellerCost(1000);
 
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.of(product));
-
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        productService.updateBySeller(1L, dto, seller);
+        productService.updateBySeller(product, dto, seller);
 
         Assertions.assertEquals("New description", product.getDescription());
         Assertions.assertEquals(1000, product.getSellerCost());
-        Mockito.verify(productRepository).save(product);
+        Mockito.verify(productRepository)
+                .save(product);
     }
 
     /**
-     * Продавец пытается обновить товар, который ему НЕ назначен
+     * Проверяется успешная покупка
      */
     @Test
-    void testUpdateProductByNonAssignedSeller() {
-        Product product = new Product();
-        product.setId(1L);
+    void testBuy(){
+        product.setSeller(new User());
 
-        User assignedSeller = new User();
-        assignedSeller.setId(10L);
-        assignedSeller.setRole(Role.SELLER);
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+        Mockito.when(productRepository.save(Mockito.any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        User otherSeller = new User();
-        otherSeller.setId(20L);
-        otherSeller.setRole(Role.SELLER);
+        productService.buyProduct(1L, buyer);
 
-        product.setSeller(assignedSeller);
+        Assertions.assertEquals(buyer, product.getBuyer());
+        Mockito.verify(productRepository, Mockito.times(1))
+                .save(product);
+    }
+
+    /**
+     * Проверяется попытка купить архивированный товар
+     */
+    @Test
+    void testBuyArchivedProduct(){
+        product.setArchived(true);
 
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
 
-        ProductSellerUpdateDTO dto = new ProductSellerUpdateDTO();
-        dto.setDescription("New desc");
-        dto.setSellerCost(300);
-
-        AccessDeniedException ex = Assertions.assertThrows(
-                AccessDeniedException.class,
-                () -> productService.updateBySeller(1L, dto, otherSeller)
+        ProductArchiveException ex = Assertions.assertThrows(
+                ProductArchiveException.class,
+                () -> productService.buyProduct(1L, buyer)
         );
 
-        Assertions.assertEquals("Этот товар не назначен вам!", ex.getMessage());
+        Assertions.assertEquals("Товар с id = 1 находится уже в архиве", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
 
-        Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
+    /**
+     * Проверяется попытка купить товар без продавца
+     */
+    @Test
+    void testBuyProductWithoutSeller(){
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductWithoutSellerException ex = Assertions.assertThrows(
+                ProductWithoutSellerException.class,
+                () -> productService.buyProduct(1L, buyer)
+        );
+
+        Assertions.assertEquals(
+                "Товар с id = 1 не имеет назначенного продавца", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * Проверяется попытка купить уже купленный товар
+     */
+    @Test
+    void testBuyAlreadyBoughtProduct(){
+        product.setSeller(new User());
+        product.setBuyer(new User());
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductAlreadyBoughtException ex = Assertions.assertThrows(
+                ProductAlreadyBoughtException.class,
+                () -> productService.buyProduct(1L, buyer)
+        );
+
+        Assertions.assertEquals("Товар с id = 1 уже куплен", ex.getMessage());
+
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
     }
 }
