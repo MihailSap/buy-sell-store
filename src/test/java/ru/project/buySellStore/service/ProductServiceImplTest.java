@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
@@ -16,7 +18,6 @@ import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.impl.ProductServiceImpl;
 import ru.project.buySellStore.service.impl.UserServiceImpl;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -226,5 +227,71 @@ class ProductServiceImplTest {
 
         Assertions.assertEquals(seller, product.getSeller());
         Mockito.verify(productRepository).save(product);
+    }
+
+    /**
+     * Проверяет успешное обновление товара продавцом
+     */
+    @Test
+    void testUpdateSeller() {
+        Product product = new Product();
+        product.setId(1L);
+
+        User seller = new User();
+        seller.setId(10L);
+        seller.setRole(Role.SELLER);
+
+        product.setSeller(seller);
+
+        ProductSellerUpdateDTO dto = new ProductSellerUpdateDTO();
+        dto.setDescription("New description");
+        dto.setSellerCost(1000);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        Mockito.when(productRepository.save(Mockito.any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        productService.updateBySeller(1L, dto, seller);
+
+        Assertions.assertEquals("New description", product.getDescription());
+        Assertions.assertEquals(1000, product.getSellerCost());
+        Mockito.verify(productRepository).save(product);
+    }
+
+    /**
+     * Продавец пытается обновить товар, который ему НЕ назначен
+     */
+    @Test
+    void testUpdateProductByNonAssignedSeller() {
+        Product product = new Product();
+        product.setId(1L);
+
+        User assignedSeller = new User();
+        assignedSeller.setId(10L);
+        assignedSeller.setRole(Role.SELLER);
+
+        User otherSeller = new User();
+        otherSeller.setId(20L);
+        otherSeller.setRole(Role.SELLER);
+
+        product.setSeller(assignedSeller);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductSellerUpdateDTO dto = new ProductSellerUpdateDTO();
+        dto.setDescription("New desc");
+        dto.setSellerCost(300);
+
+        AccessDeniedException ex = Assertions.assertThrows(
+                AccessDeniedException.class,
+                () -> productService.updateBySeller(1L, dto, otherSeller)
+        );
+
+        Assertions.assertEquals("Этот товар не назначен вам!", ex.getMessage());
+
+        Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
     }
 }
