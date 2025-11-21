@@ -1,5 +1,6 @@
 package ru.project.buySellStore.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
@@ -16,22 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Севрис для управление сущности Товара
+ * Сервис для управления товаром
  */
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
-    private final UserServiceImpl userServiceImpl;
-
     /**
      * Создание экземпляра с внедрением нужных зависимостей
      * @param productRepository репозиторий для работы с сущностью Товара
      */
-    public ProductServiceImpl(ProductRepository productRepository, UserServiceImpl userServiceImpl) {
+    @Autowired
+    public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.userServiceImpl = userServiceImpl;
     }
 
     @Override
@@ -58,39 +57,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+    public void updateBySeller(Product product, ProductSellerUpdateDTO productSellerUpdateDTO,
                        User seller) {
-        Product product = findById(id);
-
-        if (product.getSeller() == null || !product.getSeller().equals(seller)) {
-            throw new AccessDeniedException("Этот товар не назначен вам!");
-        }
-
         product.setDescription(productSellerUpdateDTO.getDescription());
         product.setSellerCost(productSellerUpdateDTO.getSellerCost());
-
         productRepository.save(product);
     }
 
     @Override
-    public void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO
-            ,User supplier) {
-        Product product = findById(id);
-
-        if (!product.getSupplier().equals(supplier)) {
-            throw new AccessDeniedException("Поставщик может изменять только свои товары!");
-        }
-
-        if (product.getSeller() != null) {
-            throw new AccessDeniedException(
-                    "Поставщик не может редактировать товар после назначения продавца!"
-            );
-        }
-
+    public void updateBySupplier(
+            Product product, ProductSupplierUpdateDTO productSupplierUpdateDTO,User supplier) {
         product.setName(productSupplierUpdateDTO.getName());
         product.setDescription(productSupplierUpdateDTO.getDescription());
         product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
-
         productRepository.save(product);
     }
 

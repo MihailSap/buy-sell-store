@@ -31,7 +31,7 @@ public interface ProductService {
     /**
      * Продавец обновляет товар по id
      */
-    void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
+    void updateBySeller(Product product, ProductSellerUpdateDTO productSellerUpdateDTO,
                        User seller);
 
     /**
@@ -63,6 +63,6 @@ public interface ProductService {
      * Поставщик меняет товар по id. Он имеет эту возможность до того как
      * назначил продавца
      */
-    void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO,
+    void updateBySupplier(Product product, ProductSupplierUpdateDTO productSupplierUpdateDTO,
                           User supplier);
 }

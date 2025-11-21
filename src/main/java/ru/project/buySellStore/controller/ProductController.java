@@ -90,13 +90,16 @@ public class ProductController {
     public String updateBySeller(@PathVariable("id") Long id,
                          @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO) {
         User user = authService.getAuthenticatedUser();
-
         if (!user.getRole().equals(Role.SELLER)) {
             throw new AccessDeniedException("Только продавец может менять описание и цену!");
         }
 
-        productService.updateBySeller(id, productUpdateSellerDTO, user);
+        Product product = productService.findById(id);
+        if (product.getSeller() == null || !product.getSeller().equals(user)) {
+            throw new AccessDeniedException("Этот товар не назначен вам!");
+        }
 
+        productService.updateBySeller(product, productUpdateSellerDTO, user);
         return String.format(
                 "Продавец '%s' изменил стоимость и описание товара '%s'!",
                 user.getLogin(), productService.findById(id).getName()
@@ -112,13 +115,21 @@ public class ProductController {
             @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO) {
 
         User supplier = authService.getAuthenticatedUser();
-
         if (!supplier.getRole().equals(Role.SUPPLIER)) {
-            throw new AccessDeniedException("Только поставщик может редактировать товар!");
+            throw new AccessDeniedException(
+                    "Только поставщик может редактировать название, описание и изначальную цену товара!");
         }
 
-        productService.updateBySupplier(id, productSupplierUpdateDTO, supplier);
+        Product product = productService.findById(id);
+        if (!product.getSupplier().equals(supplier)) {
+            throw new AccessDeniedException("Поставщик может изменять только свои товары!");
+        }
+        if (product.getSeller() != null) {
+            throw new AccessDeniedException(
+                    "Поставщик не может редактировать товар после назначения продавца!");
+        }
 
+        productService.updateBySupplier(product, productSupplierUpdateDTO, supplier);
         return String.format(
                 "Поставщик '%s' изменил товар '%s'",
                 supplier.getLogin(),
@@ -195,15 +206,12 @@ public class ProductController {
 
     @PostMapping("/{id}/buy")
     public String buy(@PathVariable("id") Long id) {
-
         User buyer = authService.getAuthenticatedUser();
-
         if (!buyer.getRole().equals(Role.BUYER)) {
             throw new AccessDeniedException("Покупать товары может только покупатель!");
         }
 
         productService.buyProduct(id, buyer);
-
         return String.format(
                 "Покупатель '%s' купил товар '%s'",
                 buyer.getLogin(),
