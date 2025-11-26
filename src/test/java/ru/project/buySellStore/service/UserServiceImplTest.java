@@ -7,12 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.project.buySellStore.dto.RegisterDTO;
-import ru.project.buySellStore.dto.UserDTO;
-import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
-import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.UserRepository;
 import ru.project.buySellStore.service.impl.UserServiceImpl;
@@ -29,37 +24,18 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private UserServiceImpl userService;
 
     /**
-     * Тест на получение пользователя с несуществующим id
+     * <b>Тест на сохранение пользователя</b>
      */
     @Test
-    void testGetUserById(){
-        Mockito.when(userRepository.findById(1000L)).thenReturn(Optional.empty());
-        UserNotFoundException ex = Assertions.assertThrows(UserNotFoundException.class,
-                () -> userService.getUserById(1000L));
-
-        Assertions.assertEquals("Пользователь с id = 1000 не найден", ex.getMessage());
-    }
-
-    /**
-     * Тест на обновление пользователя с несуществующим id
-     */
-    @Test
-    void testUpdateUser(){
-        UserDTO userDTO = new UserDTO();
-        Mockito.when(userRepository.findById(1000L))
-                .thenReturn(Optional.empty());
-        UserNotFoundException ex = Assertions.assertThrows(UserNotFoundException.class,
-                () -> userService.update(1000L, userDTO));
-        Assertions.assertEquals("Пользователь с id = 1000 не найден",
-                ex.getMessage());
-        Mockito.verify(userRepository, Mockito.never()).delete(Mockito.any());
+    void testSave(){
+        User user = new User();
+        Mockito.when(userRepository.save(user))
+                .thenReturn(user);
+        Assertions.assertEquals(user, userService.save(user));
     }
 
     /**
@@ -77,29 +53,41 @@ class UserServiceImplTest {
     }
 
     /**
-     * Тест на создание двух пользователей с одинаковыми логинами
+     * <b>Тест на получение пользователя по несуществующему id</b>
      */
     @Test
-    void createUsersWithSameLoginsTest() throws UserAlreadyExistsException {
-        RegisterDTO registerDTO = new RegisterDTO(
-                "user",
-                "user@yandex.ru",
-                "12345678",
-                Role.SELLER
-        );
+    void testGetUserByNonExistingId(){
+        Mockito.when(userRepository.findById(1000L))
+                .thenReturn(Optional.empty());
+        UserNotFoundException ex = Assertions.assertThrows(UserNotFoundException.class,
+                () -> userService.getUserById(1000L));
 
-        Mockito.when(userRepository.existsByLogin(registerDTO.getLogin()))
-                .thenReturn(false)
+        Assertions.assertEquals("Пользователь с id = 1000 не найден", ex.getMessage());
+    }
+
+    /**
+     * <b>Тест на получение пользователя по существующему id</b>
+     */
+    @Test
+    void testGetUserByExistingId() throws UserNotFoundException {
+        Long existingId = 1L;
+        User user = new User();
+        user.setId(existingId);
+
+        Mockito.when(userRepository.findById(existingId))
+                .thenReturn(Optional.of(user));
+
+        Assertions.assertEquals(user, userService.getUserById(existingId));
+    }
+
+    /**
+     * <b>Тест на проверку существования пользователя с таким {@code login}</b>
+     */
+    @Test
+    void testIsExistsByLogin(){
+        String login = "user";
+        Mockito.when(userRepository.existsByLogin(login))
                 .thenReturn(true);
-        Mockito.when(passwordEncoder.encode(registerDTO.getPassword()))
-                .thenReturn("encodedPassword");
-        userService.create(registerDTO);
-        UserAlreadyExistsException exception = Assertions.assertThrows(
-                UserAlreadyExistsException.class,
-                () -> userService.create(registerDTO));
-        Assertions.assertEquals("Пользователь с логином 'user' уже существует",
-                exception.getMessage());
-        Mockito.verify(userRepository,
-                Mockito.times(1)).save(Mockito.any(User.class));
+        Assertions.assertTrue(userService.isExistsByLogin(login));
     }
 }

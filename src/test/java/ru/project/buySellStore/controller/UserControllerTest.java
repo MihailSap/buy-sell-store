@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.UserMapper;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.impl.AuthServiceImpl;
@@ -40,18 +41,18 @@ class UserControllerTest {
     @MockitoBean
     private AuthServiceImpl authService;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     /**
-     * Проверяет получение пользователя по id
-     * Ожидается - корректное отображение пользователя
+     * <b>Проверяет получение пользователя по существующему id.</b>
+     * <p>Ожидается - корректное отображение пользователя</p>
      */
     @Test
-    void getUserByIdTest() throws Exception {
+    void testGetUserByExistingId() throws Exception {
         User user = new User();
         Date birthDate = new Date();
-        user.setId(1L);
         user.setLogin("user");
         user.setEmail("user@email.com");
-        user.setBirthDate(birthDate);
         user.setCity("Ekaterinburg");
         user.setDescription("Небольшое описание");
         UserDTO userDTO = new UserDTO(
@@ -61,8 +62,10 @@ class UserControllerTest {
                 "Ekaterinburg",
                 "Небольшое описание");
 
-        Mockito.when(userService.getUserById(1L)).thenReturn(user);
-        Mockito.when(userMapper.mapToUserDTO(user)).thenReturn(userDTO);
+        Mockito.when(userService.getUserById(1L))
+                .thenReturn(user);
+        Mockito.when(userMapper.mapToUserDTO(user))
+                .thenReturn(userDTO);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login").value(userDTO.getLogin()))
@@ -70,15 +73,35 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.city").value(userDTO.getCity()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(userDTO.getDescription()));
 
-        Mockito.verify(userService, Mockito.times(1)).getUserById(1L);
+        Mockito.verify(userService)
+                .getUserById(1L);
     }
 
     /**
-     * Проверяет корректность ответа при обновлении существующего пользователя
-     * Ожидается, что тело ответа содержит 'Ваш профиль изменен!'
+     * <b>Проверяет получение пользователя по несуществующему id.</b>
+     * <p>Ожидается - возвращение соответствующей ошибки</p>
      */
     @Test
-    void updateTest() throws Exception {
+    void testGetUserByNonExistingId() throws Exception {
+        Long nonExistingId = 1L;
+        Mockito.when(userService.getUserById(nonExistingId))
+                .thenThrow(new UserNotFoundException(nonExistingId));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Пользователь с id = 1 не найден"));
+
+        Mockito.verify(userService)
+                .getUserById(nonExistingId);
+    }
+
+    /**
+     * <b>Проверяет корректность ответа при обновлении существующего пользователя</b>
+     * <p>Ожидается, что тело ответа содержит 'Ваш профиль изменен!'</p>
+     */
+    @Test
+    void testUpdate() throws Exception {
         UserDTO userDTO = new UserDTO(
                 "user",
                 "user@mail.com",
@@ -86,20 +109,23 @@ class UserControllerTest {
                 "Ekaterinburg",
                 "Небольшое описание");
 
+        Mockito.when(userService.getUserById(1L))
+                        .thenReturn(new User());
+
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(userDTO)))
+                        .content(objectMapper.writeValueAsString(userDTO)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Ваш профиль изменен!"));
 
         Mockito.verify(userService, Mockito.times(1))
-                .update(Mockito.eq(1L), Mockito.any(UserDTO.class));
+                .save(Mockito.any(User.class));
     }
 
     /**
-     * Проверяет корректность ответа при удалении существующего пользователя
-     * Ожидается, что тело ответа содержит 'Профиль пользователя удален!'
-     * Также, должны быть вызваны нужные методы
+     * <b>Проверяет корректность ответа при удалении существующего пользователя</b>
+     * <p>Ожидается, что тело ответа содержит 'Профиль пользователя удален!'
+     * Также, должны быть вызваны нужные методы</p>
      */
     @Test
     void deleteTest() throws Exception {
@@ -109,7 +135,9 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Профиль пользователя удален!"));
 
-        Mockito.verify(authService, Mockito.times(1)).logout(Mockito.any(HttpSession.class));
-        Mockito.verify(userService, Mockito.times(1)).delete(userId);
+        Mockito.verify(authService)
+                .logout(Mockito.any(HttpSession.class));
+        Mockito.verify(userService)
+                .delete(userId);
     }
 }
