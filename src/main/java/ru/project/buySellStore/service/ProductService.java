@@ -26,21 +26,27 @@ public interface ProductService {
 
     /**
      * Получить товар по id
+     * Если товара с таким id не существует, выбрасывается {@link ProductNotFoundException}
      */
     Product findById(Long id) throws ProductNotFoundException;
 
     /**
      * Удалить товар по id
+     * Если товара с таким id не существует, выбрасывается {@link ProductNotFoundException}
      */
     void delete(Long id) throws ProductNotFoundException;
 
     /**
      * Архивировать товар по id
+     * При попытке архивировать товар,
+     * который уже находится в архиве, выбрасывается {@link ProductArchiveException}
      */
     void archive(Long id) throws ProductNotFoundException, ProductArchiveException;
 
     /**
      * Восстановить из архива по id
+     * При попытке удалить из архива товар,
+     * которого там нет, выбрасывается {@link ProductRestoreException}
      */
     void restore(Long id) throws ProductNotFoundException, ProductRestoreException;
 }

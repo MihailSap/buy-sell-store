@@ -16,11 +16,13 @@ public interface UserService {
 
     /**
      * Удаление {@link User} по id
+     * Если пользователя с указанным id не существует, выбрасывается {@link UserNotFoundException}
      */
     void delete(Long userId) throws UserNotFoundException;
 
     /**
      * Получение {@link User} по id
+     * Если пользователя с указанным id не существует, выбрасывается {@link UserNotFoundException}
      */
     User getUserById(Long userId) throws UserNotFoundException;
 
