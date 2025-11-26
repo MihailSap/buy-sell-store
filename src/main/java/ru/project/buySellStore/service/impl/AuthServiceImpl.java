@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.LoginDTO;
 import ru.project.buySellStore.dto.RegisterDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.security.UserDetailsImpl;
 import ru.project.buySellStore.service.AuthService;
@@ -23,15 +24,8 @@ import ru.project.buySellStore.service.UserService;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    /**
-     * Интерфейс для обработки аутентификации
-     */
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Интерфейс для работы с User.
-     * Позволяет создавать аккаунт для нового пользователя
-     */
     private final UserService userService;
 
     /**
@@ -44,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(RegisterDTO registerDTO){
+    public void register(RegisterDTO registerDTO) throws UserAlreadyExistsException {
         userService.create(registerDTO);
     }
 

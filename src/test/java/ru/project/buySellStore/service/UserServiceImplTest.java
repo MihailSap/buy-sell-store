@@ -80,7 +80,7 @@ class UserServiceImplTest {
      * Тест на создание двух пользователей с одинаковыми логинами
      */
     @Test
-    void createUsersWithSameLoginsTest(){
+    void createUsersWithSameLoginsTest() throws UserAlreadyExistsException {
         RegisterDTO registerDTO = new RegisterDTO(
                 "user",
                 "user@yandex.ru",

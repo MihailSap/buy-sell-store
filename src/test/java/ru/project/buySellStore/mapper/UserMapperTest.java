@@ -16,9 +16,6 @@ import java.util.Date;
  */
 public class UserMapperTest {
 
-    /**
-     * Класс для маппинга {@link User}
-     */
     private UserMapper userMapper;
 
     /**

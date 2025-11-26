@@ -18,14 +18,8 @@ import ru.project.buySellStore.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-    /**
-     * Репозиторий для работы с сущностью {@link User}
-     */
     private final UserRepository userRepository;
 
-    /**
-     * Экземпляр {@link PasswordEncoder}, используемый для шифрования паролей.
-     */
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -40,7 +34,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(RegisterDTO registerDTO) {
+    public User create(RegisterDTO registerDTO) throws UserAlreadyExistsException {
         if(userRepository.existsByLogin(registerDTO.getLogin())){
             throw new UserAlreadyExistsException(registerDTO.getLogin());
         }
@@ -54,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(Long userId, UserDTO userDTO) {
+    public User update(Long userId, UserDTO userDTO) throws UserNotFoundException {
         User user = getUserById(userId);
         user.setEmail(userDTO.getEmail());
         user.setLogin(userDTO.getLogin());
@@ -65,13 +59,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(Long userId) {
-        User user = getUserById(userId);
-        userRepository.delete(user);
+    public void delete(Long userId) throws UserNotFoundException {
+        try{
+            User user = getUserById(userId);
+            userRepository.delete(user);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException(userId);
+        }
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public User getUserById(Long userId) throws UserNotFoundException {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }

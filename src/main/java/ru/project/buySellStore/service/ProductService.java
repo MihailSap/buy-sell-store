@@ -2,6 +2,9 @@ package ru.project.buySellStore.service;
 
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductUpdateDTO;
+import ru.project.buySellStore.exception.productEx.ProductArchiveException;
+import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
+import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
 
 import java.util.List;
@@ -24,25 +27,25 @@ public interface ProductService {
     /**
      * Получить товар по id
      */
-    Product findById(Long id);
+    Product findById(Long id) throws ProductNotFoundException;
 
     /**
      * Обновить товар по id
      */
-    void update(Long id, ProductUpdateDTO updatedProductDto);
+    void update(Long id, ProductUpdateDTO updatedProductDto) throws ProductNotFoundException;
 
     /**
      * Удалить товар  по id
      */
-    void delete(Long id);
+    void delete(Long id) throws ProductNotFoundException;
 
     /**
      * Архивировать товар по id
      */
-    void archive(Long id);
+    void archive(Long id) throws ProductNotFoundException, ProductArchiveException;
 
     /**
      * Восстановить из архива по id
      */
-    void restore(Long id);
+    void restore(Long id) throws ProductNotFoundException, ProductRestoreException;
 }

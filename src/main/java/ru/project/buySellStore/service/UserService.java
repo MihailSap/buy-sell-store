@@ -2,6 +2,8 @@ package ru.project.buySellStore.service;
 
 import ru.project.buySellStore.dto.RegisterDTO;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.model.User;
 
 /**
@@ -13,20 +15,20 @@ public interface UserService {
     /**
      * Создание {@link User}
      */
-    User create(RegisterDTO registerDTO);
+    User create(RegisterDTO registerDTO) throws UserAlreadyExistsException;
 
     /**
      * Обновление профиля пользователя
      */
-    User update(Long userId, UserDTO userDTO);
+    User update(Long userId, UserDTO userDTO) throws UserNotFoundException;
 
     /**
      * Удаление {@link User} по id
      */
-    void delete(Long userId);
+    void delete(Long userId) throws UserNotFoundException;
 
     /**
      * Получение {@link User} по id
      */
-    User getUserById(Long userId);
+    User getUserById(Long userId) throws UserNotFoundException;
 }

@@ -3,6 +3,7 @@ package ru.project.buySellStore.service;
 import jakarta.servlet.http.HttpSession;
 import ru.project.buySellStore.dto.LoginDTO;
 import ru.project.buySellStore.dto.RegisterDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.User;
 
 /**
@@ -14,7 +15,7 @@ public interface AuthService {
     /**
      * Регистрация пользователя
      */
-    void register(RegisterDTO registerDTO);
+    void register(RegisterDTO registerDTO) throws UserAlreadyExistsException;
 
     /**
      * Вход пользователя в аккаунт

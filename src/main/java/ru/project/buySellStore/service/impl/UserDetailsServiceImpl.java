@@ -17,9 +17,6 @@ import ru.project.buySellStore.security.UserDetailsImpl;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    /**
-     * Репозиторий для работы с сущностью {@link User}
-     */
     private final UserRepository userRepository;
 
     /**
@@ -31,12 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Извлечение из БД информации о пользователе в виде объекта {@link UserDetails}
-     * @param email адрес электронной почты пользователя
-     * @return объект {@link UserDetails} для найденного {@link User}
-     * @throws UsernameNotFoundException появляется, когда пользователь с таким логином не найден
-     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)

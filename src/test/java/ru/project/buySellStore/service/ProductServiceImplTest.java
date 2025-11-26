@@ -34,10 +34,10 @@ class ProductServiceImplTest {
     /**
      * Проверяет нахождения товара, которого не существует
      *
-     * Ожидается, что сохранненый товар можно найти
+     * Ожидается, что сохраненный товар можно найти
      */
     @Test
-    void findByIdTest() {
+    void findNonExistingProduct() {
         Mockito.when(productRepository.findById(1000L)).thenReturn(Optional.empty());
 
         ProductNotFoundException ex = Assertions.assertThrows(ProductNotFoundException.class,
@@ -105,7 +105,7 @@ class ProductServiceImplTest {
      * Ожидается, значение поля archived станет true
      */
     @Test
-    void archiveTest() {
+    void archiveTest() throws ProductArchiveException, ProductNotFoundException {
         Product product = new Product();
         product.setId(1L);
 
@@ -156,7 +156,7 @@ class ProductServiceImplTest {
      * Ожидается, значение поля archived станет false
      */
     @Test
-    void restoreTest() {
+    void restoreTest() throws ProductNotFoundException, ProductRestoreException {
         Product product = new Product();
         product.setId(1L);
         product.setArchived(true);

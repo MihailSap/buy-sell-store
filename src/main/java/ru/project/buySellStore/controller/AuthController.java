@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.LoginDTO;
 import ru.project.buySellStore.dto.RegisterDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.impl.AuthServiceImpl;
@@ -39,7 +40,8 @@ public class AuthController {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(@Validated @RequestBody RegisterDTO registerDTO) {
+    public String register(@Validated @RequestBody RegisterDTO registerDTO)
+            throws UserAlreadyExistsException {
         authService.register(registerDTO);
         return String.format("Пользователь %s зарегистрирован!", registerDTO.getLogin());
     }

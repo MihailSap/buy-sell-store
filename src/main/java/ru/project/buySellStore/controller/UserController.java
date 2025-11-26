@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.UserMapper;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
@@ -48,7 +49,7 @@ public class UserController {
      * @return DTO с информацией о пользователе
      */
     @GetMapping("/{userId}")
-    public UserDTO get(@PathVariable("userId") Long userId){
+    public UserDTO get(@PathVariable("userId") Long userId) throws UserNotFoundException {
         User user = userService.getUserById(userId);
         return userMapper.mapToUserDTO(user);
     }
@@ -60,7 +61,9 @@ public class UserController {
      * @return строка, сообщающая об успешном изменении профиля
      */
     @PatchMapping("/{userId}")
-    public String update(@PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO){
+    public String update(
+            @PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO)
+            throws UserNotFoundException {
         userService.update(userId, userDTO);
         return "Ваш профиль изменен!";
     }
@@ -71,7 +74,8 @@ public class UserController {
      * @return строка, сообщающая об успешном удалении пользователя
      */
     @DeleteMapping("/{userId}")
-    public String delete(@PathVariable("userId") Long userId, HttpSession session){
+    public String delete(@PathVariable("userId") Long userId, HttpSession session)
+            throws UserNotFoundException {
         authService.logout(session);
         userService.delete(userId);
         return "Профиль пользователя удален!";

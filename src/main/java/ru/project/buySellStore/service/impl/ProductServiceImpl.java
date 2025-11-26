@@ -1,5 +1,6 @@
 package ru.project.buySellStore.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductUpdateDTO;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Севрис для управление сущности Товара
+ * Сервис для управления сущностью товара
  */
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -25,6 +26,7 @@ public class ProductServiceImpl implements ProductService {
      * Создание экземпляра с внедрением нужных зависимостей
      * @param productRepository репозиторий для работы с сущностью Товара
      */
+    @Autowired
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
@@ -46,13 +48,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findById(Long id) {
+    public Product findById(Long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override
-    public void update(Long id, ProductUpdateDTO updatedProductDto) {
+    public void update(Long id, ProductUpdateDTO updatedProductDto) throws ProductNotFoundException {
         Product product = findById(id);
         product.setName(updatedProductDto.getName());
         product.setDescription(updatedProductDto.getDescription());
@@ -62,13 +64,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) {
-        findById(id);
-        productRepository.deleteById(id);
+    public void delete(Long id) throws ProductNotFoundException {
+        try{
+            Product product = findById(id);
+            productRepository.delete(product);
+        } catch (ProductNotFoundException e) {
+            throw new ProductNotFoundException(id);
+        }
     }
 
     @Override
-    public void archive(Long id) {
+    public void archive(Long id) throws ProductNotFoundException, ProductArchiveException {
         Product product = findById(id);
 
         if(product.isArchived()) {
@@ -80,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void restore(Long id) {
+    public void restore(Long id) throws ProductNotFoundException, ProductRestoreException {
         Product product = findById(id);
 
         if (!product.isArchived()) {

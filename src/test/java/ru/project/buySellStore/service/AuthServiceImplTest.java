@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ru.project.buySellStore.dto.LoginDTO;
 import ru.project.buySellStore.dto.RegisterDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.security.UserDetailsImpl;
@@ -56,7 +57,7 @@ class AuthServiceImplTest {
      * Ожидается, что будет вызван метод {@code create()} из класса {@link UserServiceImpl}
      */
     @Test
-    void registerTest() {
+    void registerTest() throws UserAlreadyExistsException {
         RegisterDTO registerDTO = new RegisterDTO(
                 "user", "user@mail.com", "password", Role.SELLER);
         authService.register(registerDTO);
