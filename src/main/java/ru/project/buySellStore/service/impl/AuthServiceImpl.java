@@ -7,13 +7,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.project.buySellStore.dto.LoginDTO;
-import ru.project.buySellStore.dto.RegisterDTO;
-import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.security.UserDetailsImpl;
 import ru.project.buySellStore.service.AuthService;
-import ru.project.buySellStore.service.UserService;
 
 /**
  * Сервис, отвечающий за аутентификацию пользователей.
@@ -26,28 +22,16 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
 
-    private final UserService userService;
-
     /**
      * Конструктор для внедрения нужных зависимостей и создания экземпляра класса AuthServiceImpl
      */
     @Autowired
-    public AuthServiceImpl(AuthenticationManager authenticationManager, UserService userService) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
     }
 
     @Override
-    public void register(RegisterDTO registerDTO) throws UserAlreadyExistsException {
-        userService.create(registerDTO);
-    }
-
-    @Override
-    public void login(LoginDTO loginDTO, HttpSession session){
-        UsernamePasswordAuthenticationToken authenticationInputToken = new UsernamePasswordAuthenticationToken(
-                loginDTO.getEmail(), loginDTO.getPassword()
-        );
-
+    public void login(UsernamePasswordAuthenticationToken authenticationInputToken, HttpSession session){
         Authentication authentication = authenticationManager.authenticate(authenticationInputToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());

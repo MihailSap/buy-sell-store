@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.UserMapper;
 import ru.project.buySellStore.model.User;
@@ -23,7 +24,6 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
 
     private final UserService userService;
 
@@ -64,7 +64,13 @@ public class UserController {
     public String update(
             @PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO)
             throws UserNotFoundException {
-        userService.update(userId, userDTO);
+        User user = userService.getUserById(userId);
+        user.setEmail(userDTO.getEmail());
+        user.setLogin(userDTO.getLogin());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setCity(userDTO.getCity());
+        user.setDescription(userDTO.getDescription());
+        userService.save(user);
         return "Ваш профиль изменен!";
     }
 

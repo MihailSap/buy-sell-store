@@ -2,8 +2,6 @@ package ru.project.buySellStore.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
@@ -32,12 +30,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(ProductDTO productDto) {
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
-        product.setCost(productDto.getCost());
+    public Product save(Product product) {
         return productRepository.save(product);
     }
 
@@ -51,16 +44,6 @@ public class ProductServiceImpl implements ProductService {
     public Product findById(Long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-    }
-
-    @Override
-    public void update(Long id, ProductUpdateDTO updatedProductDto) throws ProductNotFoundException {
-        Product product = findById(id);
-        product.setName(updatedProductDto.getName());
-        product.setDescription(updatedProductDto.getDescription());
-        product.setCost(updatedProductDto.getCost());
-
-        productRepository.save(product);
     }
 
     @Override

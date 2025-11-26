@@ -10,13 +10,14 @@ import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.mapper.ProductMapper;
+import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.service.ProductService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Контроллер для управление Товара
+ * Контроллер для управления товаром
  */
 @Transactional
 @RestController
@@ -53,7 +54,12 @@ public class ProductController {
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public String create(@Valid @RequestBody ProductDTO productDto) {
-        productService.save(productDto);
+        Product product = new Product();
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setCategory(productDto.getCategory());
+        product.setCost(productDto.getCost());
+        productService.save(product);
         return "Продукт создан!";
     }
 
@@ -72,7 +78,11 @@ public class ProductController {
     public String update(
             @PathVariable("id") Long id, @Valid @RequestBody ProductUpdateDTO productUpdateDTO)
             throws ProductNotFoundException {
-        productService.update(id, productUpdateDTO);
+        Product product = productService.findById(id);
+        product.setName(productUpdateDTO.getName());
+        product.setDescription(productUpdateDTO.getDescription());
+        product.setCost(productUpdateDTO.getCost());
+        productService.save(product);
         return "Продукт изменен!";
     }
 

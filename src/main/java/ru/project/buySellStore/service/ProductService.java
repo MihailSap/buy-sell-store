@@ -17,7 +17,7 @@ public interface ProductService {
     /**
      * Сохранить товар
      */
-    Product save(ProductDTO productDto);
+    Product save(Product product);
 
     /**
      * Получить все товары
@@ -30,12 +30,7 @@ public interface ProductService {
     Product findById(Long id) throws ProductNotFoundException;
 
     /**
-     * Обновить товар по id
-     */
-    void update(Long id, ProductUpdateDTO updatedProductDto) throws ProductNotFoundException;
-
-    /**
-     * Удалить товар  по id
+     * Удалить товар по id
      */
     void delete(Long id) throws ProductNotFoundException;
 
