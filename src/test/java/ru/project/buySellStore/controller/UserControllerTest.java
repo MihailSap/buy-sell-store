@@ -51,11 +51,12 @@ class UserControllerTest {
     void testGetUserByExistingId() throws Exception {
         User user = new User();
         Date birthDate = new Date();
+        user.setId(1L);
         user.setLogin("user");
         user.setEmail("user@email.com");
         user.setCity("Ekaterinburg");
         user.setDescription("Небольшое описание");
-        UserDTO userDTO = new UserDTO(
+        UserDTO userDTO = new UserDTO(1L,
                 "user",
                 "user@email.com",
                 birthDate,
@@ -68,6 +69,7 @@ class UserControllerTest {
                 .thenReturn(userDTO);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(userDTO.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login").value(userDTO.getLogin()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(userDTO.getEmail()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.city").value(userDTO.getCity()))

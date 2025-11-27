@@ -18,6 +18,7 @@ class ProductMapperTest {
     void toDto_fromProduct() {
         ProductMapper productMapper = new ProductMapper();
         Product product = new Product();
+        product.setId(1L);
         product.setName("Футболка Puma");
         product.setDescription("Комфортная");
         product.setCategory("CLOTHES");
@@ -26,6 +27,7 @@ class ProductMapperTest {
         ProductDTO dto = productMapper.toDto(product);
 
         Assertions.assertNotNull(dto);
+        Assertions.assertEquals(product.getId(), dto.getId());
         Assertions.assertEquals(product.getName(), dto.getName());
         Assertions.assertEquals(product.getDescription(), dto.getDescription());
         Assertions.assertEquals(product.getCategory(), dto.getCategory());

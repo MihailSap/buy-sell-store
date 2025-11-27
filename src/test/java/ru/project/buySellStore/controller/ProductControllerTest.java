@@ -58,11 +58,11 @@ class ProductControllerTest {
         product2.setCategory("ELECTRONICS");
         product2.setCost(2000);
 
-        ProductDTO productDTO1 = new ProductDTO("name1",
+        ProductDTO productDTO1 = new ProductDTO(1L,"name1",
                 "description1",
                 "CLOTHES",
                 1000);
-        ProductDTO productDTO2 = new ProductDTO("name2",
+        ProductDTO productDTO2 = new ProductDTO(2L,"name2",
                 "description2",
                 "ELECTRONICS"
                 , 2000);
@@ -76,10 +76,12 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(productDTO1.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(productDTO1.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(productDTO1.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].category").value(productDTO1.getCategory()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].cost").value(productDTO1.getCost()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(productDTO2.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(productDTO2.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].description").value(productDTO2.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].category").value(productDTO2.getCategory()))
@@ -101,7 +103,7 @@ class ProductControllerTest {
         product.setCategory("CLOTHES");
         product.setCost(1000);
 
-        ProductDTO productDTO = new ProductDTO("name",
+        ProductDTO productDTO = new ProductDTO(1L,"name",
                 "description",
                 "CLOTHES",
                 1000);
@@ -113,6 +115,8 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(productDTO.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(productDTO.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(productDTO.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(productDTO.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.category").value(productDTO.getCategory()))
