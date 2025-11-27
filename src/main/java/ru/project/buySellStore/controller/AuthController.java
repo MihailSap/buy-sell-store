@@ -21,7 +21,6 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
  * Контроллер с эндпоинтами для регистрации, входа и выхода пользователя
  * @author SapeginMihail
  */
-@Transactional
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -50,6 +49,7 @@ public class AuthController {
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
     public String register(@Validated @RequestBody RegisterDTO registerDTO)
             throws UserAlreadyExistsException {
         String login = registerDTO.getLogin();
@@ -72,6 +72,7 @@ public class AuthController {
      * @return строка с приветствием по логину
      */
     @PostMapping("/login")
+    @Transactional(readOnly = true)
     public String login(@Validated @RequestBody LoginDTO loginDTO, HttpSession session){
         UsernamePasswordAuthenticationToken authenticationInputToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getEmail(), loginDTO.getPassword()

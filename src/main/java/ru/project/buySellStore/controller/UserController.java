@@ -20,7 +20,6 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
  * Методы контроллера возвращают строку или {@link UserDTO}
  * @author SapeginMihail
  */
-@Transactional
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -49,6 +48,7 @@ public class UserController {
      * @return DTO с информацией о пользователе
      */
     @GetMapping("/{userId}")
+    @Transactional(readOnly = true)
     public UserDTO get(@PathVariable("userId") Long userId) throws UserNotFoundException {
         User user = userService.getUserById(userId);
         return userMapper.mapToUserDTO(user);
@@ -61,6 +61,7 @@ public class UserController {
      * @return строка, сообщающая об успешном изменении профиля
      */
     @PatchMapping("/{userId}")
+    @Transactional
     public String update(
             @PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO)
             throws UserNotFoundException {
@@ -80,6 +81,7 @@ public class UserController {
      * @return строка, сообщающая об успешном удалении пользователя
      */
     @DeleteMapping("/{userId}")
+    @Transactional
     public String delete(@PathVariable("userId") Long userId, HttpSession session)
             throws UserNotFoundException {
         authService.logout(session);
