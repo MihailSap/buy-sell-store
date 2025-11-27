@@ -15,9 +15,6 @@ import java.util.List;
  */
 public class UserDetailsImpl implements UserDetails {
 
-    /**
-     * Объект {@link User} представляющий аутентифицированного пользователя
-     */
     private final User user;
 
     /**

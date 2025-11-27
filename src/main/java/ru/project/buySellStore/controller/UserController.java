@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.UserMapper;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
@@ -22,7 +24,6 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
 
     private final UserService userService;
 
@@ -48,7 +49,7 @@ public class UserController {
      * @return DTO с информацией о пользователе
      */
     @GetMapping("/{userId}")
-    public UserDTO get(@PathVariable("userId") Long userId){
+    public UserDTO get(@PathVariable("userId") Long userId) throws UserNotFoundException {
         User user = userService.getUserById(userId);
         return userMapper.mapToUserDTO(user);
     }
@@ -60,8 +61,16 @@ public class UserController {
      * @return строка, сообщающая об успешном изменении профиля
      */
     @PatchMapping("/{userId}")
-    public String update(@PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO){
-        userService.update(userId, userDTO);
+    public String update(
+            @PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO)
+            throws UserNotFoundException {
+        User user = userService.getUserById(userId);
+        user.setEmail(userDTO.getEmail());
+        user.setLogin(userDTO.getLogin());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setCity(userDTO.getCity());
+        user.setDescription(userDTO.getDescription());
+        userService.save(user);
         return "Ваш профиль изменен!";
     }
 
@@ -71,7 +80,8 @@ public class UserController {
      * @return строка, сообщающая об успешном удалении пользователя
      */
     @DeleteMapping("/{userId}")
-    public String delete(@PathVariable("userId") Long userId, HttpSession session){
+    public String delete(@PathVariable("userId") Long userId, HttpSession session)
+            throws UserNotFoundException {
         authService.logout(session);
         userService.delete(userId);
         return "Профиль пользователя удален!";

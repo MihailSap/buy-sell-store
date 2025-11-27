@@ -3,7 +3,7 @@ package ru.project.buySellStore.exception.globalEx;
 /**
  * Главный Exception проекта
  */
-public class BuySellStoreException extends RuntimeException {
+public class BuySellStoreException extends Exception {
 
     /**
      * Создание c указанным сообщением
