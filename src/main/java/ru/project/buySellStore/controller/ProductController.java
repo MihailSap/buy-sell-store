@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 /**
  * Контроллер для управления товаром
  */
-@Transactional
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -42,6 +41,7 @@ public class ProductController {
      * Получение всех товаров, не считая архивных
      */
     @GetMapping
+    @Transactional(readOnly = true)
     public List<ProductDTO> findAll() {
         return productService.findAll().stream()
                 .map(productMapper::toDto)
@@ -53,6 +53,7 @@ public class ProductController {
      */
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
     public String create(@Valid @RequestBody ProductDTO productDto) {
         Product product = new Product();
         product.setName(productDto.getName());
@@ -67,6 +68,7 @@ public class ProductController {
      * Получение товара по id
      */
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public ProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
         return productMapper.toDto(productService.findById(id));
     }
@@ -75,6 +77,7 @@ public class ProductController {
      * Обновление товара по id
      */
     @PatchMapping("/{id}")
+    @Transactional
     public String update(
             @PathVariable("id") Long id, @Valid @RequestBody ProductUpdateDTO productUpdateDTO)
             throws ProductNotFoundException {
@@ -90,6 +93,7 @@ public class ProductController {
      * Удаление товара по id
      */
     @DeleteMapping("/{id}")
+    @Transactional
     public String delete(@PathVariable("id") Long id)
             throws ProductNotFoundException {
         productService.delete(id);
@@ -100,6 +104,7 @@ public class ProductController {
      * Архивирование товара по id
      */
     @PostMapping("/{id}/archive")
+    @Transactional
     public String archive(@PathVariable("id") Long id)
             throws ProductArchiveException, ProductNotFoundException {
         productService.archive(id);
@@ -110,6 +115,7 @@ public class ProductController {
      * Восстановление товара из архива по id
      */
     @PostMapping("/{id}/restore")
+    @Transactional
     public String restore(@PathVariable("id") Long id)
             throws ProductNotFoundException, ProductRestoreException {
         productService.restore(id);

@@ -50,6 +50,7 @@ public class UserMapperTest {
         UserDTO dto = userMapper.mapToUserDTO(user);
 
         Assertions.assertNotNull(dto);
+        Assertions.assertEquals(user.getId(), dto.getId());
         Assertions.assertEquals(user.getLogin(), dto.getLogin());
         Assertions.assertEquals(user.getEmail(), dto.getEmail());
         Assertions.assertEquals(user.getBirthDate(), dto.getBirthDate());
