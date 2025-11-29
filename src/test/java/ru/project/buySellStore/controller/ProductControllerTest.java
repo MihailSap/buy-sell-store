@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
+import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -130,7 +130,7 @@ class ProductControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(productDTO1.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(productDTO1.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].category").value(productDTO1.getCategory()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].cost").value(productDTO1.getCost()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].supplierCost").value(productDTO1.getSupplierCost()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(productDTO2.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].supplierCost").value(productDTO1.getSupplierCost()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(productDTO2.getName()))
@@ -179,8 +179,9 @@ class ProductControllerTest {
                         .content(new ObjectMapper().writeValueAsString(productDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().string("Поставщик 'supplier-user' создал товар 'name'"));
+
         Mockito.verify(productService, Mockito.times(1))
-                .save(Mockito.any(ProductDTO.class), Mockito.any(User.class));
+                .save(Mockito.any(Product.class));
     }
 
     /**
@@ -199,7 +200,7 @@ class ProductControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("Только поставщик может создавать товар!"));
         Mockito.verify(productService, Mockito.never())
-                .save(Mockito.any(ProductDTO.class), Mockito.any(User.class));
+                .save(Mockito.any(Product.class));
     }
 
     /**
@@ -334,14 +335,13 @@ class ProductControllerTest {
 
         updateDTO.setDescription("description");
         updateDTO.setSellerCost(1000);
-
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
 
         Mockito.when(productService.findById(1L))
                 .thenReturn(product);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(updateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -349,7 +349,7 @@ class ProductControllerTest {
                         .string("Продавец 'seller-user' изменил стоимость и описание товара 'name'!"));
 
         Mockito.verify(productService, Mockito.times(1))
-                .updateBySeller(Mockito.eq(1L), Mockito.any(ProductSellerUpdateDTO.class), Mockito.eq(sellerUser));
+                .save(Mockito.any(Product.class));
     }
 
     /**
@@ -362,11 +362,12 @@ class ProductControllerTest {
 
         updateDTO.setDescription("description");
         updateDTO.setSellerCost(1000);
-
         Mockito.when(authService.getAuthenticatedUser())
-                .thenReturn(supplierUser);
+                .thenReturn(buyerUser);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(updateDTO)))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
@@ -374,7 +375,7 @@ class ProductControllerTest {
                         .value("Только продавец может менять описание и цену!"));
 
         Mockito.verify(productService, Mockito.never())
-                .updateBySeller(Mockito.anyLong(), Mockito.any(), Mockito.any());
+                .save(Mockito.any(Product.class));
     }
 
     /**
@@ -412,5 +413,105 @@ class ProductControllerTest {
 
         Mockito.verify(productService, Mockito.never())
                 .buyProduct(Mockito.anyLong(), Mockito.any());
+    }
+
+    /**
+     * Проверяет успешное обновление товара поставщиком
+     */
+    @Test
+    void testUpdateBySupplierSuccess() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(2000);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
+        product.setSupplier(supplierUser);
+        Mockito.when(productService.findById(1L)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("Поставщик 'supplier-user' изменил товар 'New Name'"));
+
+        Mockito.verify(productService).save(Mockito.any(Product.class));
+    }
+
+    /**
+     * Проверяет попытку обновления товара пользователем с ролью, отличной от SUPPLIER
+     */
+    @Test
+    void testUpdateBySupplierNotSupplierRole() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(buyerUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Только поставщик может редактировать товар!"));
+
+        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
+    }
+
+    /**
+     * Проверяет попытку обновления товара другим поставщиком (не владельцем товара)
+     */
+    @Test
+    void testUpdateBySupplierNotOwner() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        User otherSupplier = new User();
+        otherSupplier.setId(2L);
+        otherSupplier.setLogin("other-supplier");
+        otherSupplier.setRole(Role.SUPPLIER);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
+        product.setSupplier(otherSupplier);
+        Mockito.when(productService.findById(1L)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик может изменять только свои товары!"));
+
+        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
+    }
+
+    /**
+     * Проверяет попытку обновления товара после назначения продавца
+     */
+    @Test
+    void testUpdateBySupplierAfterSellerAssigned() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        product.setSupplier(supplierUser);
+        product.setSeller(sellerUser);
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
+        Mockito.when(productService.findById(1L)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик не может редактировать товар после назначения продавца!"));
+
+        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
     }
 }

@@ -9,9 +9,9 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductArchiveException;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
-import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -73,7 +73,6 @@ public class ProductController {
             throw new AccessDeniedException("Только поставщик может создавать товар!");
         }
 
-        productService.save(productDto, user);
         Product product = new Product();
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
@@ -99,7 +98,8 @@ public class ProductController {
      */
     @PatchMapping("/{id}/seller")
     public String updateBySeller(@PathVariable("id") Long id,
-                         @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO) {
+                         @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO)
+            throws ProductNotFoundException {
         User user = authService.getAuthenticatedUser();
 
         if (!user.getRole().equals(Role.SELLER)) {
@@ -123,11 +123,10 @@ public class ProductController {
     @PatchMapping("/{id}/supplier")
     public String updateBySupplier(
             @PathVariable Long id,
-            @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO) {
+            @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO)
+            throws ProductNotFoundException {
 
         User supplier = authService.getAuthenticatedUser();
-
-
 
         if (!supplier.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException("Только поставщик может редактировать товар!");
@@ -163,7 +162,7 @@ public class ProductController {
      */
     @DeleteMapping("/{productId}")
     @Transactional
-    public String delete(@PathVariable("productId") Long productId) {
+    public String delete(@PathVariable("productId") Long productId) throws ProductNotFoundException {
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException("Только поставщик может удалять товар!");
@@ -209,7 +208,8 @@ public class ProductController {
     @PostMapping("/{productId}/assign-seller")
     public String assignSeller(
             @PathVariable("productId") Long productId,
-            @RequestBody AssignSellerDTO assignSellerDTO){
+            @RequestBody AssignSellerDTO assignSellerDTO) throws UserNotFoundException,
+            ProductNotFoundException, UserNotSuitableRoleException {
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException(
@@ -231,7 +231,7 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/buy")
-    public String buy(@PathVariable("id") Long id) {
+    public String buy(@PathVariable("id") Long id) throws ProductNotFoundException, ProductWithoutSellerException, ProductArchiveException, ProductAlreadyBoughtException {
 
         User buyer = authService.getAuthenticatedUser();
 

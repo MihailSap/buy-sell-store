@@ -3,9 +3,8 @@ package ru.project.buySellStore.service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductArchiveException;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
-import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 
@@ -19,7 +18,7 @@ public interface ProductService {
     /**
      * Сохранить товар
      */
-    Product save(ProductDTO productDto, User user);
+    Product save(Product product);
 
     /**
      * Получить все товары
@@ -31,13 +30,6 @@ public interface ProductService {
      * Если товара с таким id не существует, выбрасывается {@link ProductNotFoundException}
      */
     Product findById(Long id) throws ProductNotFoundException;
-
-    /**
-     * Продавец обновляет товар по id
-     */
-    void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
-                       User seller);
-
 
     /**
      * Удалить товар по id
@@ -62,17 +54,10 @@ public interface ProductService {
     /**
      * Назначить продавца на товар
      */
-    void assignSeller(Product product, User seller);
+    void assignSeller(Product product, User seller) throws UserNotSuitableRoleException;
 
     /**
      * Покупка товара
      */
-    void buyProduct(Long id, User buyer);
-
-    /**
-     * Поставщик меняет товар по id. Он имеет эту возможность до того как
-     * назначил продавца
-     */
-    void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO,
-                          User supplier);
+    void buyProduct(Long id, User buyer) throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
 }

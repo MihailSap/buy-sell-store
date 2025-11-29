@@ -49,12 +49,12 @@ public class ProductDTO {
      * Конструктор с id и всем полями для получения информации
      * о товаре
      */
-    public ProductDTO(Long id, String name, String description, String category, Integer cost) {
+    public ProductDTO(Long id, String name, String description, String category, Integer supplierCost) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.category = category;
-        this.cost = cost;
+        this.supplierCost = supplierCost;
     }
 
     /**

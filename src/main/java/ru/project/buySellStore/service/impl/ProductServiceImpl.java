@@ -37,13 +37,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(ProductDTO productDto, User supplier) {
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
-        product.setSupplierCost(productDto.getSupplierCost());
-        product.setSupplier(supplier);
+    public Product save(Product product) {
         return productRepository.save(product);
     }
 
@@ -57,43 +51,6 @@ public class ProductServiceImpl implements ProductService {
     public Product findById(Long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
-    }
-
-    @Override
-    public void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
-                       User seller) {
-        Product product = findById(id);
-
-        if (product.getSeller() == null || !product.getSeller().equals(seller)) {
-            throw new AccessDeniedException("Этот товар не назначен вам!");
-        }
-
-        product.setDescription(productSellerUpdateDTO.getDescription());
-        product.setSellerCost(productSellerUpdateDTO.getSellerCost());
-
-        productRepository.save(product);
-    }
-
-    @Override
-    public void updateBySupplier(Long id, ProductSupplierUpdateDTO productSupplierUpdateDTO
-            ,User supplier) {
-        Product product = findById(id);
-
-        if (!product.getSupplier().equals(supplier)) {
-            throw new AccessDeniedException("Поставщик может изменять только свои товары!");
-        }
-
-        if (product.getSeller() != null) {
-            throw new AccessDeniedException(
-                    "Поставщик не может редактировать товар после назначения продавца!"
-            );
-        }
-
-        product.setName(productSupplierUpdateDTO.getName());
-        product.setDescription(productSupplierUpdateDTO.getDescription());
-        product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
-
-        productRepository.save(product);
     }
 
     public void delete(Long id) throws ProductNotFoundException {
@@ -130,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void assignSeller(Product product, User seller){
+    public void assignSeller(Product product, User seller) throws UserNotSuitableRoleException {
         if(!seller.getRole().equals(Role.SELLER)) {
             throw new UserNotSuitableRoleException(
                     "Продавцом можно назначить только пользователя с ролью SELLER");
@@ -141,7 +98,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void buyProduct(Long id, User buyer) {
+    public void buyProduct(Long id, User buyer) throws ProductArchiveException,
+            ProductWithoutSellerException, ProductAlreadyBoughtException,
+            ProductNotFoundException {
         Product product = findById(id);
 
         if (product.isArchived()) {
