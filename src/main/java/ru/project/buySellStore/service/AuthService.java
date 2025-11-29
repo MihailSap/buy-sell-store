@@ -1,8 +1,10 @@
 package ru.project.buySellStore.service;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import ru.project.buySellStore.dto.LoginDTO;
 import ru.project.buySellStore.dto.RegisterDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
 import ru.project.buySellStore.model.User;
 
 /**
@@ -12,14 +14,9 @@ import ru.project.buySellStore.model.User;
 public interface AuthService {
 
     /**
-     * Регистрация пользователя
-     */
-    void register(RegisterDTO registerDTO);
-
-    /**
      * Вход пользователя в аккаунт
      */
-    void login(LoginDTO loginDTO, HttpSession session);
+    void login(UsernamePasswordAuthenticationToken authenticationInputToken, HttpSession session);
 
     /**
      * Выход пользователя из аккаунта

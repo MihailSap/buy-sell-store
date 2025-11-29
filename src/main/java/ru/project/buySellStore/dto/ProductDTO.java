@@ -7,6 +7,8 @@ import jakarta.validation.constraints.*;
  */
 public class ProductDTO {
 
+    private Long id;
+
     @NotBlank(message = "Название не может быть пустым")
     @Size(max = 30, message = "Название не должно превышать 30 символов")
     @Pattern(
@@ -30,7 +32,7 @@ public class ProductDTO {
     private Integer supplierCost;
 
     /**
-     * Создание экземпляра со всеми полями
+     * Конструктор для создания продукта
      * @param name название
      * @param description описание
      * @param category категория
@@ -44,10 +46,35 @@ public class ProductDTO {
     }
 
     /**
+     * Конструктор с id и всем полями для получения информации
+     * о товаре
+     */
+    public ProductDTO(Long id, String name, String description, String category, Integer cost) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.cost = cost;
+    }
+
+    /**
+     * Установить id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * Получить id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
      * Создание экземпляра без полей
      */
     public ProductDTO() {
-
     }
 
     /**

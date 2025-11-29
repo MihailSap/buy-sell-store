@@ -12,12 +12,6 @@ import java.util.Date;
  */
 public class BirthDateValidator implements ConstraintValidator<BirthDate, Date> {
 
-    /**
-     * Проверяет, чтобы указанная дата была прошедшей
-     * @param birthDate дата рождения, указанная пользователем
-     * @param constraintValidatorContext контекст валидации
-     * @return {@code true}, если дата рождения указана верно {@code false}, если нет
-     */
     @Override
     public boolean isValid(Date birthDate, ConstraintValidatorContext constraintValidatorContext) {
         return birthDate == null || !birthDate.after(new Date());

@@ -18,6 +18,7 @@ public class UserMapper {
      */
     public UserDTO mapToUserDTO(User user) {
         return new UserDTO(
+                user.getId(),
                 user.getLogin(),
                 user.getEmail(),
                 user.getBirthDate(),

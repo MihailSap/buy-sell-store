@@ -3,6 +3,9 @@ package ru.project.buySellStore.service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.exception.productEx.ProductArchiveException;
+import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
+import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 
@@ -25,8 +28,9 @@ public interface ProductService {
 
     /**
      * Получить товар по id
+     * Если товара с таким id не существует, выбрасывается {@link ProductNotFoundException}
      */
-    Product findById(Long id);
+    Product findById(Long id) throws ProductNotFoundException;
 
     /**
      * Продавец обновляет товар по id
@@ -34,20 +38,26 @@ public interface ProductService {
     void updateBySeller(Long id, ProductSellerUpdateDTO productSellerUpdateDTO,
                        User seller);
 
+
     /**
      * Удалить товар по id
+     * Если товара с таким id не существует, выбрасывается {@link ProductNotFoundException}
      */
-    void delete(Long id);
+    void delete(Long id) throws ProductNotFoundException;
 
     /**
      * Архивировать товар по id
+     * При попытке архивировать товар,
+     * который уже находится в архиве, выбрасывается {@link ProductArchiveException}
      */
-    void archive(Long id);
+    void archive(Long id) throws ProductNotFoundException, ProductArchiveException;
 
     /**
      * Восстановить из архива по id
+     * При попытке удалить из архива товар,
+     * которого там нет, выбрасывается {@link ProductRestoreException}
      */
-    void restore(Long id);
+    void restore(Long id) throws ProductNotFoundException, ProductRestoreException;
 
     /**
      * Назначить продавца на товар

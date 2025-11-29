@@ -221,33 +221,19 @@ public class User {
         this.description = description;
     }
 
-    /**
-     * Переопределение метода {@code equals()} для сущности пользователя.
-     * В нём используются все поля класса {@link User}
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && Objects.equals(login, user.login) && Objects.equals(email, user.email)
-                && Objects.equals(password, user.password) && Objects.equals(birthDate, user.birthDate)
-                && Objects.equals(city, user.city) && Objects.equals(description, user.description) && role == user.role;
+        return id == user.id;
     }
 
-    /**
-     * Переопределение метода {@code hashCode()} для сущности пользователя.
-     * В нём используются все поля класса {@link User}
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(id, login, email, password, birthDate, city, description, role);
+        return Objects.hashCode(id);
     }
 
-    /**
-     * Переопределение метода {@code toString()} для сущности пользователя.
-     * В нём используются все поля класса {@link User}
-     */
     @Override
     public String toString() {
         return "User{" +

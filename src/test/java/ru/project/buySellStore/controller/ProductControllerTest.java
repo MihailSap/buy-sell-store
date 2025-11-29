@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -88,9 +89,8 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет получение списка всех товаров
-     *
-     * Ожидается - корректное отображение данных всех продуктов в JSON-ответе
+     * <b>Проверяет получение списка всех товаров</b>
+     * <p>Ожидается - корректное отображение данных всех продуктов в JSON-ответе</p>
      */
     @Test
     void testFindAll() throws Exception {
@@ -108,24 +108,30 @@ class ProductControllerTest {
         product2.setCategory("ELECTRONICS");
         product2.setSupplierCost(2000);
 
-        ProductDTO productDTO1 = new ProductDTO("name1",
+        ProductDTO productDTO1 = new ProductDTO(1L,"name1",
                 "description1",
                 "CLOTHES",
                 1000);
-        ProductDTO productDTO2 = new ProductDTO("name2",
+        ProductDTO productDTO2 = new ProductDTO(2L,"name2",
                 "description2",
                 "ELECTRONICS"
                 , 2000);
 
-        Mockito.when(productService.findAll()).thenReturn(List.of(product1, product2));
-        Mockito.when(productMapper.toDto(product1)).thenReturn(productDTO1);
-        Mockito.when(productMapper.toDto(product2)).thenReturn(productDTO2);
+        Mockito.when(productService.findAll())
+                .thenReturn(List.of(product1, product2));
+        Mockito.when(productMapper.toDto(product1))
+                .thenReturn(productDTO1);
+        Mockito.when(productMapper.toDto(product2))
+                .thenReturn(productDTO2);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(productDTO1.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(productDTO1.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(productDTO1.getDescription()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].category").value(productDTO1.getCategory()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].cost").value(productDTO1.getCost()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(productDTO2.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].supplierCost").value(productDTO1.getSupplierCost()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(productDTO2.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].description").value(productDTO2.getDescription()))
@@ -136,14 +142,17 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет получение товара по его id
-     *
-     * Ожидается - корректное отображение свойств одного продукта в JSON-ответе
+     * <b>Проверяет получение товара по существующему {@code id}</b>
+     * <p>Ожидается - корректное отображение свойств одного продукта в JSON-ответе</p>
      */
     @Test
     void testFindById() throws Exception {
         Mockito.when(productService.findById(1L)).thenReturn(product);
         Mockito.when(productMapper.toDto(product)).thenReturn(productDTO);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+        Mockito.when(productMapper.toDto(product))
+                .thenReturn(productDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -236,9 +245,8 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет архивирование товара
-     *
-     * Ожидается - тело ответа содержит сообщение "Товар добавлен в архив"
+     * <b>Проверяет архивирование товара</b>
+     * <p>Ожидается - тело ответа содержит сообщение "Товар добавлен в архив"</p>
      */
     @Test
     void testArchive() throws Exception {
@@ -251,9 +259,8 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет восстановление товара из архива
-     *
-     * Ожидается - тело ответа содержит сообщение о возвращении товара в открытый доступ
+     * <b>Проверяет восстановление товара из архива</b>
+     * <p>Ожидается - тело ответа содержит сообщение о возвращении товара в открытый доступ</p>
      */
     @Test
     void testRestore() throws Exception {
@@ -264,7 +271,7 @@ class ProductControllerTest {
                                 "Теперь другие пользователи снова могут просматривать и покупать его"
                 ));
 
-        Mockito.verify(productService, Mockito.times(1))
+        Mockito.verify(productService)
                 .restore(1L);
     }
 

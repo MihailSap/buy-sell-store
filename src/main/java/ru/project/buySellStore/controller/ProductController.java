@@ -9,11 +9,15 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.exception.productEx.ProductArchiveException;
+import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
+import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
+import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.service.ProductService;
 import ru.project.buySellStore.service.impl.UserServiceImpl;
 
@@ -21,15 +25,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Контроллер для управление Товара
+ * Контроллер для управления товаром
  */
-@Transactional
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
-
     private final ProductMapper productMapper;
 
     private final AuthService authService;
@@ -52,6 +54,7 @@ public class ProductController {
      * Получение всех товаров, не считая архивных
      */
     @GetMapping
+    @Transactional(readOnly = true)
     public List<ProductDTO> findAll() {
         return productService.findAll().stream()
                 .map(productMapper::toDto)
@@ -63,6 +66,7 @@ public class ProductController {
      */
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
+    @Transactional
     public String create(@Valid @RequestBody ProductDTO productDto) {
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
@@ -70,6 +74,12 @@ public class ProductController {
         }
 
         productService.save(productDto, user);
+        Product product = new Product();
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setCategory(productDto.getCategory());
+        product.setSellerCost(productDto.getSupplierCost());
+        productService.save(product);
         return String.format(
                 "Поставщик '%s' создал товар '%s'",
                 authService.getAuthenticatedUser().getLogin(), productDto.getName());
@@ -79,7 +89,8 @@ public class ProductController {
      * Получение товара по id
      */
     @GetMapping("/{id}")
-    public ProductDTO findById(@PathVariable("id") Long id) {
+    @Transactional(readOnly = true)
+    public ProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
         return productMapper.toDto(productService.findById(id));
     }
 
@@ -95,7 +106,10 @@ public class ProductController {
             throw new AccessDeniedException("Только продавец может менять описание и цену!");
         }
 
-        productService.updateBySeller(id, productUpdateSellerDTO, user);
+        Product product = productService.findById(id);
+        product.setDescription(productUpdateSellerDTO.getDescription());
+        product.setSellerCost(productUpdateSellerDTO.getSellerCost());
+        productService.save(product);
 
         return String.format(
                 "Продавец '%s' изменил стоимость и описание товара '%s'!",
@@ -113,11 +127,29 @@ public class ProductController {
 
         User supplier = authService.getAuthenticatedUser();
 
+
+
         if (!supplier.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException("Только поставщик может редактировать товар!");
         }
 
-        productService.updateBySupplier(id, productSupplierUpdateDTO, supplier);
+        Product product = productService.findById(id);
+
+        if (!product.getSupplier().equals(supplier)) {
+            throw new AccessDeniedException("Поставщик может изменять только свои товары!");
+        }
+
+        if (product.getSeller() != null) {
+            throw new AccessDeniedException(
+                    "Поставщик не может редактировать товар после назначения продавца!"
+            );
+        }
+
+        product.setName(productSupplierUpdateDTO.getName());
+        product.setDescription(productSupplierUpdateDTO.getDescription());
+        product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
+
+        productService.save(product);
 
         return String.format(
                 "Поставщик '%s' изменил товар '%s'",
@@ -130,6 +162,7 @@ public class ProductController {
      * Удаление товара по id
      */
     @DeleteMapping("/{productId}")
+    @Transactional
     public String delete(@PathVariable("productId") Long productId) {
         User user = authService.getAuthenticatedUser();
         if(!user.getRole().equals(Role.SUPPLIER)) {
@@ -151,7 +184,9 @@ public class ProductController {
      * Архивирование товара по id
      */
     @PostMapping("/{id}/archive")
-    public String archive(@PathVariable("id") Long id) {
+    @Transactional
+    public String archive(@PathVariable("id") Long id)
+            throws ProductArchiveException, ProductNotFoundException {
         productService.archive(id);
         return "Товар добавлен в архив";
     }
@@ -160,7 +195,9 @@ public class ProductController {
      * Восстановление товара из архива по id
      */
     @PostMapping("/{id}/restore")
-    public String restore(@PathVariable("id") Long id) {
+    @Transactional
+    public String restore(@PathVariable("id") Long id)
+            throws ProductNotFoundException, ProductRestoreException {
         productService.restore(id);
         return "Ваш товар вернулся в открытый доступ. " +
                 "Теперь другие пользователи снова могут просматривать и покупать его";
