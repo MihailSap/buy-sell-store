@@ -98,7 +98,8 @@ public class ProductController {
      */
     @PatchMapping("/{id}/seller")
     public String updateBySeller(@PathVariable("id") Long id,
-                         @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO) throws ProductNotFoundException {
+                         @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO)
+            throws ProductNotFoundException {
         User user = authService.getAuthenticatedUser();
 
         if (!user.getRole().equals(Role.SELLER)) {
@@ -122,11 +123,10 @@ public class ProductController {
     @PatchMapping("/{id}/supplier")
     public String updateBySupplier(
             @PathVariable Long id,
-            @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO) throws ProductNotFoundException {
+            @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO)
+            throws ProductNotFoundException {
 
         User supplier = authService.getAuthenticatedUser();
-
-
 
         if (!supplier.getRole().equals(Role.SUPPLIER)) {
             throw new AccessDeniedException("Только поставщик может редактировать товар!");
