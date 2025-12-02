@@ -17,7 +17,6 @@ import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
-import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.service.ProductService;
 import ru.project.buySellStore.service.impl.UserServiceImpl;
 
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     private final ProductService productService;
+
     private final ProductMapper productMapper;
 
     private final AuthService authService;
@@ -62,6 +62,15 @@ public class ProductController {
     }
 
     /**
+     * Получение товара по id
+     */
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    public ProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
+        return productMapper.toDto(productService.findById(id));
+    }
+
+    /**
      * Создание нового товара
      */
     @PostMapping("/add")
@@ -85,18 +94,11 @@ public class ProductController {
     }
 
     /**
-     * Получение товара по id
-     */
-    @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    public ProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
-        return productMapper.toDto(productService.findById(id));
-    }
-
-    /**
-     * Обновление товара по id Продавцу
+     * <b>Обновление товара по {@code id}</b>
+     * <p>Для пользователя с ролью {@link Role#SELLER}</p>
      */
     @PatchMapping("/{id}/seller")
+    @Transactional
     public String updateBySeller(@PathVariable("id") Long id,
                          @Valid @RequestBody ProductSellerUpdateDTO productUpdateSellerDTO)
             throws ProductNotFoundException {
@@ -119,9 +121,11 @@ public class ProductController {
     }
 
     /**
-     * Обновление товара по id Поставщику
+     * <b>Обновление товара по id </b>
+     * <p>Для пользователя с ролью {@link Role#SUPPLIER}</p>
      */
     @PatchMapping("/{id}/supplier")
+    @Transactional
     public String updateBySupplier(
             @PathVariable Long id,
             @Valid @RequestBody ProductSupplierUpdateDTO productSupplierUpdateDTO)
@@ -150,8 +154,6 @@ public class ProductController {
         product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
 
         productService.save(product);
-
-        productService.updateBySupplier(product, productSupplierUpdateDTO, supplier);
         return String.format(
                 "Поставщик '%s' изменил товар '%s'",
                 supplier.getLogin(),
@@ -208,6 +210,7 @@ public class ProductController {
      * Определение продавца для товара
      */
     @PostMapping("/{productId}/assign-seller")
+    @Transactional
     public String assignSeller(
             @PathVariable("productId") Long productId,
             @RequestBody AssignSellerDTO assignSellerDTO) throws UserNotFoundException,
@@ -222,7 +225,7 @@ public class ProductController {
         Product product = productService.findById(productId);
         if(!user.equals(product.getSupplier())){
             throw new AccessDeniedException(
-                    "Поставщик может назначать продавцов только на свои товары");
+                    "Поставщик может назначать продавца только на свой товар");
         }
 
         productService.assignSeller(product, seller);
@@ -233,6 +236,7 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/buy")
+    @Transactional
     public String buy(@PathVariable("id") Long id) 
       throws ProductNotFoundException, ProductWithoutSellerException, ProductArchiveException, ProductAlreadyBoughtException {
 
