@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
@@ -16,11 +15,9 @@ import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.impl.ProductServiceImpl;
-import ru.project.buySellStore.service.impl.UserServiceImpl;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Тесты для проверки функционала {@link ProductServiceImpl}
@@ -51,27 +48,25 @@ class ProductServiceImplTest {
     }
 
     /**
-     * Проверяет нахождения товара, которого не существует
-     *
-     * Ожидается, что сохраненный товар можно найти
+     * <b>Проверяет поиск несуществующего товара</b>
+     * <p>Ожидается появление ошибки с сообщением: "Товар с id = 1 не найден"</p>
      */
     @Test
-    void findNonExistingProduct() {
-        Mockito.when(productRepository.findById(1000L)).thenReturn(Optional.empty());
+    void testFindNonExistingProductById() {
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.empty());
 
         ProductNotFoundException ex = Assertions.assertThrows(ProductNotFoundException.class,
-                () -> productService.findById(1000L));
+                () -> productService.findById(1L));
 
-        Assertions.assertEquals("Товар с id = 1000 не найден", ex.getMessage());
+        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
     }
 
     /**
-     * Проверяет корректность получения всех товаров из базы данных
-     *
-     * Ожидается, что мы получим все товары, которые не в архиве
+     * Проверяет получение всех существующих не архивированных товаров
      */
     @Test
-    void findAllTest() {
+    void testFindAll() {
         Product productArchive = new Product();
         productArchive.setId(2L);
         productArchive.setArchived(true);
@@ -93,35 +88,28 @@ class ProductServiceImplTest {
     }
 
     /**
-     * Проверяет удаление товара, которого не существует
-     *
-     * Ожидается, что выпадет исключение ProductNotFoundException
+     * <b>Проверяет удаление несуществующего товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1000 не найден"</p>
      */
     @Test
-    void deleteTest() {
+    void testDeleteNonExistingProduct() {
         Mockito.when(productRepository.findById(1000L))
                 .thenReturn(Optional.empty());
 
         ProductNotFoundException ex = Assertions.assertThrows(
-                ProductNotFoundException.class,
-                () -> productService.delete(1000L)
-        );
+                ProductNotFoundException.class, () -> productService.delete(1000L));
 
-        Assertions.assertEquals(
-                "Товар с id = 1000 не найден",
-                ex.getMessage()
-        );
-
-        Mockito.verify(productRepository, Mockito.never()).delete(Mockito.any());
+        Assertions.assertEquals("Товар с id = 1000 не найден",ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .delete(Mockito.any());
     }
 
     /**
-     * Проверяет процесс архивирования товара
-     *
-     * Ожидается, значение поля archived станет true
+     * <b>Проверяет процесс архивирования товара</b>
+     * <p>Ожидается, значение поля archived станет true</p>
      */
     @Test
-    void archiveTest() throws ProductArchiveException, ProductNotFoundException {
+    void testArchive() throws ProductArchiveException, ProductNotFoundException {
         Product product = new Product();
         product.setId(1L);
 
@@ -138,36 +126,47 @@ class ProductServiceImplTest {
     }
 
     /**
-     * Проверяет процесс архивирования товара, когда товар был уже в архиве
-     *
-     * Ожидается, что выпадет исключение ProductArchiveException
+     * <b>Проверяется архивирование несуществующего товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 не найден"</p>
      */
     @Test
-    void archiveArchivedProductTest() {
+    void testArchiveNonExistingProduct() {
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        ProductNotFoundException ex = Assertions.assertThrows(
+                ProductNotFoundException.class, () -> productService.archive(1L));
+
+        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет процесс архивирования архивированного ранее товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 уже находится в архиве"</p>
+     */
+    @Test
+    void testArchiveArchivedProduct() {
         product.setArchived(true);
 
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
 
         ProductArchiveException ex = Assertions.assertThrows(
-                ProductArchiveException.class,
-                () -> productService.archive(1L)
-        );
+                ProductArchiveException.class, () -> productService.archive(1L));
 
-        Assertions.assertEquals(
-                "Товар с id = 1 находится уже в архиве",
-                ex.getMessage()
-        );
-        Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
+        Assertions.assertEquals("Товар с id = 1 уже находится в архиве",ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any());
     }
 
     /**
-     * Проверяет восстановление товара из архива
-     *
-     * Ожидается, значение поля archived станет false
+     * <b>Проверяет восстановление товара из архива</b>
+     * <p>Ожидается, значение поля {@code archived} станет {@code false}</p>
      */
     @Test
-    void restoreTest() throws ProductNotFoundException, ProductRestoreException {
+    void testRestore() throws ProductNotFoundException, ProductRestoreException {
         Product product = new Product();
         product.setId(1L);
         product.setArchived(true);
@@ -185,36 +184,47 @@ class ProductServiceImplTest {
     }
 
     /**
-     * Проверяет восстановление товара из архива, когда товар и так не в архиве
-     *
-     * Ожидается, что выпадет исключение ProductRestoreException
+     * <b>Проверяет восстановление из архива не архивированного товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар c id = 1 уже доступен и не находится в архиве"</p>
      */
     @Test
-    void restoreNoArchivedProductTest() {
+    void testRestoreNonArchivedProduct() {
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
 
         ProductRestoreException ex = Assertions.assertThrows(
-                ProductRestoreException.class,
-                () -> productService.restore(1L)
-        );
+                ProductRestoreException.class, () -> productService.restore(1L));
 
         Assertions.assertEquals(
-                "Товар c id = 1 уже доступен и не находится в архиве",
-                ex.getMessage()
-        );
+                "Товар c id = 1 уже доступен и не находится в архиве", ex.getMessage());
 
-        Mockito.verify(productRepository, Mockito.never()).save(Mockito.any());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
     }
 
     /**
-     * Проверяет назначение продавца на товар
+     * <b>Проверяет восстановление несуществующего товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 не найден"</p>
+     */
+    @Test
+    void testRestoreNonExistingProduct() {
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        ProductNotFoundException ex = Assertions.assertThrows(
+                ProductNotFoundException.class, () -> productService.restore(1L));
+
+        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет назначение продавца на товар</b>
+     * <p>Ожидается, что у товара появится продавец</p>
      */
     @Test
     void testAssignSeller() throws UserNotSuitableRoleException {
-        Product product = new Product();
-        product.setId(1L);
-
         User seller = new User();
         seller.setRole(Role.SELLER);
 
@@ -224,6 +234,123 @@ class ProductServiceImplTest {
         productService.assignSeller(product, seller);
 
         Assertions.assertEquals(seller, product.getSeller());
-        Mockito.verify(productRepository).save(product);
+        Mockito.verify(productRepository)
+                .save(product);
+    }
+
+    /**
+     * <b>Проверяет назначение продавцом на товар пользователю без роли {@link Role#SELLER}</b>
+     * <p>Ожидается появление исключения с сообщением "Продавцом можно назначить только пользователя с ролью SELLER"</p>
+     */
+    @Test
+    void testAssignSellerWrongRole() {
+        UserNotSuitableRoleException ex = Assertions.assertThrows(
+                UserNotSuitableRoleException.class, () -> productService.assignSeller(product, buyer));
+
+        Assertions.assertEquals(
+                "Продавцом можно назначить только пользователя с ролью SELLER", ex.getMessage());
+
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+
+    /**
+     * <b>Проверяет успешную покупку товара</b>
+     * <p>Ожидается, что у товара появится покупатель</p>
+     */
+    @Test
+    void testBuyProduct() throws Exception {
+        Long productId = 1L;
+        User seller = new User();
+        seller.setRole(Role.SELLER);
+        product.setSeller(seller);
+
+        Mockito.when(productRepository.findById(productId))
+                .thenReturn(Optional.of(product));
+        Mockito.when(productRepository.save(Mockito.any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        productService.buyProduct(productId, buyer);
+
+        Assertions.assertEquals(buyer, product.getBuyer());
+        Mockito.verify(productRepository)
+                .save(product);
+    }
+
+    /**
+     * <b>Проверяется покупка несуществующего товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 не найден"</p>
+     */
+    @Test
+    void testBuyNonExistingProduct() {
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        ProductNotFoundException ex = Assertions.assertThrows(
+                ProductNotFoundException.class, () -> productService.buyProduct(1L, buyer));
+
+        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяется покупка архивированного товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 уже находится в архиве"</p>
+     */
+    @Test
+    void testBuyArchivedProduct() {
+        product.setArchived(true);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductArchiveException ex = Assertions.assertThrows(
+                ProductArchiveException.class, () -> productService.buyProduct(1L, buyer));
+
+        Assertions.assertEquals("Товар с id = 1 уже находится в архиве", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяется покупка товара без продавца</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 не имеет назначенного продавца"</p>
+     */
+    @Test
+    void testBuyProductWithoutSeller() {
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductWithoutSellerException ex = Assertions.assertThrows(
+                ProductWithoutSellerException.class, () -> productService.buyProduct(1L, buyer));
+
+        Assertions.assertEquals("Товар с id = 1 не имеет назначенного продавца", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяется покупка уже купленного товара</b>
+     * <p>Ожидается появление исключения с сообщением "Товар с id = 1 уже куплен"</p>
+     */
+    @Test
+    void testBuyAlreadyBoughtProduct() {
+        User seller = new User();
+        seller.setRole(Role.SELLER);
+
+        product.setSeller(seller);
+        product.setBuyer(buyer);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductAlreadyBoughtException ex = Assertions.assertThrows(
+                ProductAlreadyBoughtException.class,() -> productService.buyProduct(1L, buyer));
+
+        Assertions.assertEquals("Товар с id = 1 уже куплен", ex.getMessage());
+        Mockito.verify(productRepository, Mockito.never())
+                .save(Mockito.any(Product.class));
     }
 }
