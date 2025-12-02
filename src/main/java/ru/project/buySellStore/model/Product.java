@@ -2,18 +2,12 @@ package ru.project.buySellStore.model;
 
 import jakarta.persistence.*;
 
-import java.util.Objects;
-
 /**
  *  Cущность товара
  */
 @Entity
 @Table(name = "product")
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Product  extends BaseEntity{
 
     private String name;
 
@@ -24,20 +18,6 @@ public class Product {
     private Integer cost;
 
     private boolean archived = false;
-
-    /**
-     * Установить id
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Получить id
-     */
-    public Long getId() {
-        return id;
-    }
 
     /**
      * Получить имя
@@ -107,18 +87,5 @@ public class Product {
      */
     public void setArchived(boolean archived) {
         this.archived = archived;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
-        return Objects.equals(id, product.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }
