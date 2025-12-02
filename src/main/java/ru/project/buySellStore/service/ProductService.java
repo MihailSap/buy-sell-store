@@ -3,6 +3,8 @@ package ru.project.buySellStore.service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 
@@ -16,7 +18,7 @@ public interface ProductService {
     /**
      * Сохранить товар
      */
-    Product save(ProductDTO productDto, User user);
+    Product save(Product product);
 
     /**
      * Получить все товары
@@ -25,44 +27,36 @@ public interface ProductService {
 
     /**
      * Получить товар по id
+     * @throws ProductNotFoundException если товара с указанным id не существует
      */
-    Product findById(Long id);
-
-    /**
-     * Продавец обновляет товар по id
-     */
-    void updateBySeller(Product product, ProductSellerUpdateDTO productSellerUpdateDTO,
-                       User seller);
+    Product findById(Long id) throws ProductNotFoundException;
 
     /**
      * Удалить товар по id
+     * @throws ProductNotFoundException если товара с указанным id не существует
      */
-    void delete(Long id);
+    void delete(Long id) throws ProductNotFoundException;
 
     /**
      * Архивировать товар по id
+     * @throws ProductArchiveException при попытке архивировать товар, который уже находится в архиве
      */
-    void archive(Long id);
+    void archive(Long id) throws ProductNotFoundException, ProductArchiveException;
 
     /**
      * Восстановить из архива по id
+     * @throws ProductRestoreException при попытке удалить из архива товар, которого там нет
      */
-    void restore(Long id);
+    void restore(Long id) throws ProductNotFoundException, ProductRestoreException;
 
     /**
      * Назначить продавца на товар
      */
-    void assignSeller(Product product, User seller);
+    void assignSeller(Product product, User seller) throws UserNotSuitableRoleException;
 
     /**
      * Покупка товара
      */
-    void buyProduct(Long id, User buyer);
-
-    /**
-     * Поставщик меняет товар по id. Он имеет эту возможность до того как
-     * назначил продавца
-     */
-    void updateBySupplier(Product product, ProductSupplierUpdateDTO productSupplierUpdateDTO,
-                          User supplier);
+    void buyProduct(Long id, User buyer) 
+      throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
 }

@@ -2,18 +2,12 @@ package ru.project.buySellStore.model;
 
 import jakarta.persistence.*;
 
-import java.util.Objects;
-
 /**
  *  Cущность товара
  */
 @Entity
 @Table(name = "product")
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Product extends BaseEntity{
 
     private String name;
 
@@ -38,20 +32,6 @@ public class Product {
     private User buyer;
 
     private boolean archived = false;
-
-    /**
-     * Установить id
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Получить id
-     */
-    public Long getId() {
-        return id;
-    }
 
     /**
      * Получить имя
@@ -107,20 +87,6 @@ public class Product {
      */
     public void setSupplierCost(Integer cost) {
         this.supplierCost = cost;
-    }
-
-    /**
-     * Узнать находится ли товар в архиве
-     */
-    public boolean isArchived() {
-        return archived;
-    }
-
-    /**
-     * Установить товар как архивный
-     */
-    public void setArchived(boolean archived) {
-        this.archived = archived;
     }
 
     /**
@@ -181,27 +147,16 @@ public class Product {
     }
 
     /**
-     * Переопределение equals со всеми полями
-     * @param o
-     * @return
+     * Узнать находится ли товар в архиве
      */
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
-        return archived == product.archived && Objects.equals(id, product.id)
-                && Objects.equals(name, product.name) && Objects.equals(description, product.description)
-                && Objects.equals(category, product.category) && Objects.equals(supplierCost, product.supplierCost)
-                && Objects.equals(seller, product.seller) && Objects.equals(sellerCost, product.sellerCost);
+    public boolean isArchived() {
+        return archived;
     }
 
     /**
-     * Переопределение hashCode со всеми полями
-     * @return
+     * Установить товар как архивный
      */
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, description, category, supplierCost, archived,
-                seller, sellerCost);
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

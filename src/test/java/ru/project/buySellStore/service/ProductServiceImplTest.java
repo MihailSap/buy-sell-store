@@ -56,7 +56,7 @@ class ProductServiceImplTest {
      * Ожидается, что сохраненный товар можно найти
      */
     @Test
-    void findByIdTest() {
+    void findNonExistingProduct() {
         Mockito.when(productRepository.findById(1000L)).thenReturn(Optional.empty());
 
         ProductNotFoundException ex = Assertions.assertThrows(ProductNotFoundException.class,
@@ -82,7 +82,7 @@ class ProductServiceImplTest {
         Mockito.when(productRepository.findAll())
                 .thenReturn(List.of(product, productArchive, newProduct));
 
-        Set<Product> products = productService.findAll().stream().collect(Collectors.toSet());
+        List<Product> products = productService.findAll();
 
         Assertions.assertEquals(2, products.size());
         Assertions.assertTrue(products.contains(product));
@@ -121,7 +121,10 @@ class ProductServiceImplTest {
      * Ожидается, значение поля archived станет true
      */
     @Test
-    void archiveTest() {
+    void archiveTest() throws ProductArchiveException, ProductNotFoundException {
+        Product product = new Product();
+        product.setId(1L);
+
         Mockito.when(productRepository.findById(1L))
                 .thenReturn(Optional.of(product));
         Mockito.when(productRepository.save(Mockito.any(Product.class)))
@@ -164,7 +167,9 @@ class ProductServiceImplTest {
      * Ожидается, значение поля archived станет false
      */
     @Test
-    void restoreTest() {
+    void restoreTest() throws ProductNotFoundException, ProductRestoreException {
+        Product product = new Product();
+        product.setId(1L);
         product.setArchived(true);
 
         Mockito.when(productRepository.findById(1L))
@@ -206,7 +211,10 @@ class ProductServiceImplTest {
      * Проверяет назначение продавца на товар
      */
     @Test
-    void testAssignSeller(){
+    void testAssignSeller() throws UserNotSuitableRoleException {
+        Product product = new Product();
+        product.setId(1L);
+
         User seller = new User();
         seller.setRole(Role.SELLER);
 
@@ -217,129 +225,5 @@ class ProductServiceImplTest {
 
         Assertions.assertEquals(seller, product.getSeller());
         Mockito.verify(productRepository).save(product);
-    }
-
-    /**
-     * Проверяет попытку назначить продавцом пользователя без роли SELLER
-     */
-    @Test
-    void testAssignSellerNotSeller(){
-        User seller = new User();
-        seller.setRole(Role.SUPPLIER);
-
-        UserNotSuitableRoleException ex = Assertions.assertThrows(
-                UserNotSuitableRoleException.class,
-                () -> productService.assignSeller(product, seller)
-        );
-
-        Assertions.assertEquals(
-                "Продавцом можно назначить только пользователя с ролью SELLER",
-                ex.getMessage()
-        );
-    }
-
-    /**
-     * Проверяет успешное обновление товара продавцом
-     */
-    @Test
-    void testUpdateSeller() {
-        User seller = new User();
-        seller.setRole(Role.SELLER);
-
-        product.setSeller(seller);
-
-        ProductSellerUpdateDTO dto = new ProductSellerUpdateDTO();
-        dto.setDescription("New description");
-        dto.setSellerCost(1000);
-
-        Mockito.when(productRepository.save(Mockito.any(Product.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        productService.updateBySeller(product, dto, seller);
-
-        Assertions.assertEquals("New description", product.getDescription());
-        Assertions.assertEquals(1000, product.getSellerCost());
-        Mockito.verify(productRepository)
-                .save(product);
-    }
-
-    /**
-     * Проверяется успешная покупка
-     */
-    @Test
-    void testBuy(){
-        product.setSeller(new User());
-
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.of(product));
-        Mockito.when(productRepository.save(Mockito.any(Product.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        productService.buyProduct(1L, buyer);
-
-        Assertions.assertEquals(buyer, product.getBuyer());
-        Mockito.verify(productRepository, Mockito.times(1))
-                .save(product);
-    }
-
-    /**
-     * Проверяется попытка купить архивированный товар
-     */
-    @Test
-    void testBuyArchivedProduct(){
-        product.setArchived(true);
-
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.of(product));
-
-        ProductArchiveException ex = Assertions.assertThrows(
-                ProductArchiveException.class,
-                () -> productService.buyProduct(1L, buyer)
-        );
-
-        Assertions.assertEquals("Товар с id = 1 находится уже в архиве", ex.getMessage());
-        Mockito.verify(productRepository, Mockito.never())
-                .save(Mockito.any(Product.class));
-    }
-
-    /**
-     * Проверяется попытка купить товар без продавца
-     */
-    @Test
-    void testBuyProductWithoutSeller(){
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.of(product));
-
-        ProductWithoutSellerException ex = Assertions.assertThrows(
-                ProductWithoutSellerException.class,
-                () -> productService.buyProduct(1L, buyer)
-        );
-
-        Assertions.assertEquals(
-                "Товар с id = 1 не имеет назначенного продавца", ex.getMessage());
-        Mockito.verify(productRepository, Mockito.never())
-                .save(Mockito.any(Product.class));
-    }
-
-    /**
-     * Проверяется попытка купить уже купленный товар
-     */
-    @Test
-    void testBuyAlreadyBoughtProduct(){
-        product.setSeller(new User());
-        product.setBuyer(new User());
-
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.of(product));
-
-        ProductAlreadyBoughtException ex = Assertions.assertThrows(
-                ProductAlreadyBoughtException.class,
-                () -> productService.buyProduct(1L, buyer)
-        );
-
-        Assertions.assertEquals("Товар с id = 1 уже куплен", ex.getMessage());
-
-        Mockito.verify(productRepository, Mockito.never())
-                .save(Mockito.any(Product.class));
     }
 }

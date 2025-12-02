@@ -15,12 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ru.project.buySellStore.dto.LoginDTO;
-import ru.project.buySellStore.dto.RegisterDTO;
-import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.security.UserDetailsImpl;
 import ru.project.buySellStore.service.impl.AuthServiceImpl;
-import ru.project.buySellStore.service.impl.UserServiceImpl;
 
 /**
  * Тесты для методов класса {@link AuthServiceImpl}
@@ -30,9 +27,6 @@ class AuthServiceImplTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
-
-    @Mock
-    private UserServiceImpl userService;
 
     @Mock
     private HttpSession session;
@@ -52,57 +46,51 @@ class AuthServiceImplTest {
     }
 
     /**
-     * Проверка корректности регистрации.
-     * Ожидается, что будет вызван метод {@code create()} из класса {@link UserServiceImpl}
+     * <b>Проверка корректности входа в аккаунт</b>
      */
     @Test
-    void registerTest() {
-        RegisterDTO registerDTO = new RegisterDTO(
-                "user", "user@mail.com", "password", Role.SELLER);
-        authService.register(registerDTO);
-        Mockito.verify(userService, Mockito.times(1)).create(registerDTO);
-    }
-
-    /**
-     * Проверка корректности входа в аккаунт
-     */
-    @Test
-    void login(){
+    void testLogin(){
         LoginDTO loginDTO = new LoginDTO();
-        Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
+        UsernamePasswordAuthenticationToken authenticationInputToken = new UsernamePasswordAuthenticationToken(
+                loginDTO.getEmail(), loginDTO.getPassword()
+        );
+
+        Mockito.when(authenticationManager.authenticate(authenticationInputToken))
                 .thenReturn(authentication);
 
-        authService.login(loginDTO, session);
-        Mockito.verify(authenticationManager, Mockito.times(1))
-                .authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
-
+        authService.login(authenticationInputToken, session);
         SecurityContext context = SecurityContextHolder.getContext();
         Assertions.assertThat(context.getAuthentication()).isEqualTo(authentication);
-        Mockito.verify(session, Mockito.times(1))
+
+        Mockito.verify(session)
                 .setAttribute(Mockito.eq("SPRING_SECURITY_CONTEXT"), Mockito.eq(context));
+        Mockito.verify(authenticationManager)
+                .authenticate(authenticationInputToken);
     }
 
     /**
-     * Проверка корректности выхода из аккаунта
-     * Ожидается, что при выходе будет вызван метод {@code invalidate()}
+     * <b>Проверка корректности выхода из аккаунта</b>
+     * <p>Ожидается, что при выходе будет вызван метод {@code invalidate()}</p>
      */
     @Test
-    void logoutTest(){
+    void testLogout(){
         authService.logout(session);
-        Mockito.verify(session, Mockito.times(1)).invalidate();
+        Mockito.verify(session)
+                .invalidate();
     }
 
     /**
-     * Проверка корректности получения текущего авторизованного пользователя
+     * <b>Проверка корректности получения текущего авторизованного пользователя</b>
      */
     @Test
-    void getAuthenticatedUserTest() {
+    void testGetAuthenticatedUser() {
         User user = new User();
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
-        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        Mockito.when(authentication.getPrincipal())
+                .thenReturn(new UserDetailsImpl(user));
 
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         User authenticatedUser = authService.getAuthenticatedUser();
-        Assertions.assertThat(authenticatedUser).isEqualTo(user);
+        Assertions.assertThat(authenticatedUser)
+                .isEqualTo(user);
     }
 }

@@ -2,12 +2,16 @@ package ru.project.buySellStore.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
+import ru.project.buySellStore.exception.productEx.ProductArchiveException;
+import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
+import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
@@ -34,13 +38,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(ProductDTO productDto, User supplier) {
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
-        product.setSupplierCost(productDto.getSupplierCost());
-        product.setSupplier(supplier);
+    public Product save(Product product) {
         return productRepository.save(product);
     }
 
@@ -51,36 +49,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findById(Long id) {
+    public Product findById(Long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    @Override
-    public void updateBySeller(Product product, ProductSellerUpdateDTO productSellerUpdateDTO,
-                       User seller) {
-        product.setDescription(productSellerUpdateDTO.getDescription());
-        product.setSellerCost(productSellerUpdateDTO.getSellerCost());
-        productRepository.save(product);
+    public void delete(Long id) throws ProductNotFoundException {
+        try{
+            Product product = findById(id);
+            productRepository.delete(product);
+        } catch (ProductNotFoundException e) {
+            throw new ProductNotFoundException(id);
+        }
     }
 
     @Override
-    public void updateBySupplier(
-            Product product, ProductSupplierUpdateDTO productSupplierUpdateDTO,User supplier) {
-        product.setName(productSupplierUpdateDTO.getName());
-        product.setDescription(productSupplierUpdateDTO.getDescription());
-        product.setSupplierCost(productSupplierUpdateDTO.getSupplierCost());
-        productRepository.save(product);
-    }
-
-    @Override
-    public void delete(Long id) {
-        findById(id);
-        productRepository.deleteById(id);
-    }
-
-    @Override
-    public void archive(Long id) {
+    public void archive(Long id) throws ProductNotFoundException, ProductArchiveException {
         Product product = findById(id);
 
         if(product.isArchived()) {
@@ -92,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void restore(Long id) {
+    public void restore(Long id) throws ProductNotFoundException, ProductRestoreException {
         Product product = findById(id);
 
         if (!product.isArchived()) {
@@ -104,7 +88,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void assignSeller(Product product, User seller){
+    public void assignSeller(Product product, User seller) throws UserNotSuitableRoleException {
         if(!seller.getRole().equals(Role.SELLER)) {
             throw new UserNotSuitableRoleException(
                     "Продавцом можно назначить только пользователя с ролью SELLER");
@@ -115,7 +99,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void buyProduct(Long id, User buyer) {
+    public void buyProduct(Long id, User buyer) throws ProductArchiveException,
+            ProductWithoutSellerException, ProductAlreadyBoughtException,
+            ProductNotFoundException {
         Product product = findById(id);
 
         if (product.isArchived()) {

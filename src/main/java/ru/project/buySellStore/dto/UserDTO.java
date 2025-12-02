@@ -1,6 +1,7 @@
 package ru.project.buySellStore.dto;
 
 import jakarta.validation.constraints.Email;
+import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.validation.annotations.BirthDate;
 import ru.project.buySellStore.validation.annotations.Login;
 
@@ -10,6 +11,11 @@ import java.util.Date;
  * DTO пользователя. Используется для передачи данных о пользователе
  */
 public class UserDTO {
+
+    /**
+     * Пользователя id
+     */
+    private Long id;
 
     /**
      * <b>Логин, под которым зарегистрирован пользователь</b>
@@ -48,7 +54,7 @@ public class UserDTO {
     private String description;
 
     /**
-     * Конструктор
+     * Конструктор для создания пользователя
      * @param login логин
      * @param email адрес электронной почты
      * @param birthDate дата рождения
@@ -64,9 +70,36 @@ public class UserDTO {
     }
 
     /**
+     * Конструктор с id и всем полями для получения информации
+     * о пользователе
+     */
+    public UserDTO(Long id, String login, String email, Date birthDate, String city, String description) {
+        this.id = id;
+        this.login = login;
+        this.email = email;
+        this.birthDate = birthDate;
+        this.city = city;
+        this.description = description;
+    }
+
+    /**
      * Пустой конструктор
      */
     public UserDTO() {
+    }
+
+    /**
+     * Установить id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * Получить id
+     */
+    public Long getId() {
+        return id;
     }
 
     /**
