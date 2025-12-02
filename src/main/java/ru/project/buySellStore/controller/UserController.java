@@ -1,0 +1,91 @@
+package ru.project.buySellStore.controller;
+
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.project.buySellStore.dto.UserDTO;
+import ru.project.buySellStore.exception.userEx.UserAlreadyExistsException;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
+import ru.project.buySellStore.mapper.UserMapper;
+import ru.project.buySellStore.model.User;
+import ru.project.buySellStore.service.AuthService;
+import ru.project.buySellStore.service.UserService;
+import ru.project.buySellStore.service.impl.AuthServiceImpl;
+import ru.project.buySellStore.service.impl.UserServiceImpl;
+
+/**
+ * Контроллер для работы с профилем пользователя {@link User}
+ * Методы контроллера возвращают строку или {@link UserDTO}
+ * @author SapeginMihail
+ */
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    private final UserService userService;
+
+    private final UserMapper userMapper;
+
+    private final AuthService authService;
+
+    /**
+     * Конструктор контроллера для внедрения нужных зависимостей и создания экземпляра класса {@link UserController}
+     * @param userService реализация интерфейса для работы с {@link User}
+     * @param userMapper
+     */
+    @Autowired
+    public UserController(UserServiceImpl userService, UserMapper userMapper, AuthServiceImpl authService) {
+        this.userService = userService;
+        this.userMapper = userMapper;
+        this.authService = authService;
+    }
+
+    /**
+     * Эндпоинт для получения DTO профиля по его id
+     * @param userId id пользователя, информацию о котором нужно получить
+     * @return DTO с информацией о пользователе
+     */
+    @GetMapping("/{userId}")
+    @Transactional(readOnly = true)
+    public UserDTO get(@PathVariable("userId") Long userId) throws UserNotFoundException {
+        User user = userService.getUserById(userId);
+        return userMapper.mapToUserDTO(user);
+    }
+
+    /**
+     * Эндпоинт для изменения профиля пользователя по его id
+     * @param userId id пользователя, профиль которого нужно изменить
+     * @param userDTO DTO с информацией, которую нужно отразить в профиле пользователя
+     * @return строка, сообщающая об успешном изменении профиля
+     */
+    @PatchMapping("/{userId}")
+    @Transactional
+    public String update(
+            @PathVariable("userId") Long userId, @Validated @RequestBody UserDTO userDTO)
+            throws UserNotFoundException {
+        User user = userService.getUserById(userId);
+        user.setEmail(userDTO.getEmail());
+        user.setLogin(userDTO.getLogin());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setCity(userDTO.getCity());
+        user.setDescription(userDTO.getDescription());
+        userService.save(user);
+        return "Ваш профиль изменен!";
+    }
+
+    /**
+     * Эндпоинт для удаления аккаунта пользователя по id.
+     * @param userId id пользователя, аккаунт которого нужно удалить
+     * @return строка, сообщающая об успешном удалении пользователя
+     */
+    @DeleteMapping("/{userId}")
+    @Transactional
+    public String delete(@PathVariable("userId") Long userId, HttpSession session)
+            throws UserNotFoundException {
+        authService.logout(session);
+        userService.delete(userId);
+        return "Профиль пользователя удален!";
+    }
+}
