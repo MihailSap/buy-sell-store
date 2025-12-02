@@ -72,7 +72,7 @@ class ProductServiceImplTest {
         Mockito.when(productRepository.findAll())
                 .thenReturn(List.of(product, productArchive, newProduct));
 
-        Set<Product> products = productService.findAll().stream().collect(Collectors.toSet());
+        List<Product> products = productService.findAll();
 
         Assertions.assertEquals(2, products.size());
         Assertions.assertTrue(products.contains(product));

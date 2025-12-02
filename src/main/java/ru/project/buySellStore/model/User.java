@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -13,15 +12,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "users")
-public class User {
-
-    /**
-     * <b>id пользователя.</b>
-     * <p>Определяется при создании сущности</p>
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class User extends BaseEntity{
 
     /**
      * <b>Логин</b>
@@ -91,7 +82,7 @@ public class User {
      * Конструктор
      */
     public User(long id, String login, String email, String password, Date birthDate, String city, String description, Role role) {
-        this.id = id;
+        this.setId(id);
         this.login = login;
         this.email = email;
         this.password = password;
@@ -107,20 +98,6 @@ public class User {
      */
     public User() {
 
-    }
-
-    /**
-     * Метод получения id пользователя
-     */
-    public long getId() {
-        return id;
-    }
-
-    /**
-     * Метод определения id пользователя
-     */
-    public void setId(long id) {
-        this.id = id;
     }
 
     /**
@@ -222,22 +199,9 @@ public class User {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id == user.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "id=" + getId() +
                 ", login='" + login + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
