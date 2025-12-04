@@ -63,26 +63,115 @@ class ProductServiceImplTest {
     }
 
     /**
-     * Проверяет получение всех существующих не архивированных товаров
+     * Тестирование метода findAll(User user) для роли SUPPLIER
+     * <p>
+     * Проверяется, что поставщик видит только свои активные товары,
+     * архивные и чужие товары не возвращаются
      */
     @Test
-    void testFindAll() {
-        Product productArchive = new Product();
-        productArchive.setId(2L);
-        productArchive.setArchived(true);
+    void testFindAllForSupplier() {
+        User supplier = new User();
+        supplier.setId(1L);
+        supplier.setRole(Role.SUPPLIER);
 
-        Product newProduct = new Product();
-        productArchive.setId(3L);
+        Product product1 = new Product();
+        product1.setId(1L);
+        product1.setSupplier(supplier);
+
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setSupplier(supplier);
+        product2.setArchived(true);
+
+        Product product3 = new Product();
+        product3.setId(3L);
+        product3.setSupplier(new User());
 
         Mockito.when(productRepository.findAll())
-                .thenReturn(List.of(product, productArchive, newProduct));
+                .thenReturn(List.of(product1, product2, product3));
 
-        List<Product> products = productService.findAll();
+        List<Product> products = productService.findAll(supplier);
 
-        Assertions.assertEquals(2, products.size());
-        Assertions.assertTrue(products.contains(product));
-        Assertions.assertTrue(products.contains(newProduct));
-        Assertions.assertFalse(products.contains(productArchive));
+        Assertions.assertEquals(1, products.size());
+        Assertions.assertTrue(products.contains(product1));
+        Assertions.assertFalse(products.contains(product2));
+        Assertions.assertFalse(products.contains(product3));
+
+        Mockito.verify(productRepository).findAll();
+    }
+
+    /**
+     * Тестирование метода findAll(User user) для роли SELLER
+     * <p>
+     * Проверяется, что покупатель видит только свои активные покупки,
+     * архивные и чужие покупки не возвращаются
+     */
+    @Test
+    void testFindAllForSeller() {
+        User seller = new User();
+        seller.setId(10L);
+        seller.setRole(Role.SELLER);
+
+        Product product1 = new Product();
+        product1.setId(1L);
+        product1.setSeller(seller);
+
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setSeller(seller);
+        product2.setArchived(true);
+
+        Product product3 = new Product();
+        product3.setId(3L);
+        product3.setSeller(new User());
+
+        Mockito.when(productRepository.findAll())
+                .thenReturn(List.of(product1, product2, product3));
+
+        List<Product> products = productService.findAll(seller);
+
+        Assertions.assertEquals(1, products.size());
+        Assertions.assertTrue(products.contains(product1));
+        Assertions.assertFalse(products.contains(product2));
+        Assertions.assertFalse(products.contains(product3));
+
+        Mockito.verify(productRepository).findAll();
+    }
+
+    /**
+     * Тестирование метода findAll(User user) для роли BUYER
+     * <p>
+     * Проверяется, что покупатель видит только свои активные покупки,
+     * архивные и чужие покупки не возвращаются
+     */
+    @Test
+    void testFindAllForBuyer() {
+        User buyer = new User();
+        buyer.setId(20L);
+        buyer.setRole(Role.BUYER);
+
+        Product product1 = new Product();
+        product1.setId(1L);
+        product1.setBuyer(buyer);
+
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setBuyer(buyer);
+        product2.setArchived(true);
+
+        Product product3 = new Product();
+        product3.setId(3L);
+        product3.setBuyer(new User());
+
+        Mockito.when(productRepository.findAll())
+                .thenReturn(List.of(product1, product2, product3));
+
+        List<Product> products = productService.findAll(buyer);
+
+        Assertions.assertEquals(1, products.size());
+        Assertions.assertTrue(products.contains(product1));
+        Assertions.assertFalse(products.contains(product2));
+        Assertions.assertFalse(products.contains(product3));
 
         Mockito.verify(productRepository).findAll();
     }
@@ -352,5 +441,45 @@ class ProductServiceImplTest {
         Assertions.assertEquals("Товар с id = 1 уже куплен", ex.getMessage());
         Mockito.verify(productRepository, Mockito.never())
                 .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет поиск существующего товара с доступом пользователя</b>
+     * <p>Ожидается, что пользователь получить свой товар</p>
+     */
+    @Test
+    void testFindExistingProductByIdWithUser() throws ProductNotFoundException {
+
+        product.setBuyer(buyer);
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        Product found = productService.findById(1L, buyer);
+
+        Assertions.assertEquals(product, found);
+    }
+
+    /**
+     * <b>Проверяет попытку поиска существующего товара у другого пользователя</b>
+     * <p>Ожидается ProductNotFoundException</p>
+     */
+    @Test
+    void testFindExistingProductByIdWithoutAccess() {
+        User otherUser = new User();
+        otherUser.setId(2L);
+        otherUser.setRole(Role.BUYER);
+
+        product.setBuyer(new User());
+
+        Mockito.when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        ProductNotFoundException ex = Assertions.assertThrows(
+                ProductNotFoundException.class,
+                () -> productService.findById(1L, otherUser)
+        );
+
+        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
     }
 }

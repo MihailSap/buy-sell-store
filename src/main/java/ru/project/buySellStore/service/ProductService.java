@@ -22,14 +22,25 @@ public interface ProductService {
 
     /**
      * Получить все товары
+     * <p>Пользователь получает только свои неархивные товары</>
      */
-    List<Product> findAll();
+    List<Product> findAll(User user);
 
     /**
      * Получить товар по id
+     * <p>
+     * Нужен для внутренней работы приложения
      * @throws ProductNotFoundException если товара с указанным id не существует
      */
     Product findById(Long id) throws ProductNotFoundException;
+
+    /**
+     * Получить товар по id
+     * <p>
+     * Нужен, чтобы пользователь получил только свои продукты
+     * @throws ProductNotFoundException если товара с указанным id не существует
+     */
+    Product findById(Long id, User user) throws ProductNotFoundException;
 
     /**
      * Удалить товар по id
