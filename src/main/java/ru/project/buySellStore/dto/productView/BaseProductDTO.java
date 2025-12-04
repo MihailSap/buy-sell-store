@@ -1,7 +1,5 @@
 package ru.project.buySellStore.dto.productView;
 
-import ru.project.buySellStore.model.Product;
-
 /**
  * Базовый класс для DTO товара
  */
@@ -15,6 +13,9 @@ public abstract class BaseProductDTO {
 
     private final String category;
 
+    /**
+     * Конструктор для базового ProductDTO
+     */
     public BaseProductDTO(Long id, String name, String description, String category) {
         this.id = id;
         this.name = name;
@@ -22,18 +23,30 @@ public abstract class BaseProductDTO {
         this.category = category;
     }
 
+    /**
+     * Получение id данного DTO продукта
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Получение названия данного DTO продукта
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Получение описания данного DTO продукта
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Получение категории данного DTO продукта
+     */
     public String getCategory() {
         return category;
     }
