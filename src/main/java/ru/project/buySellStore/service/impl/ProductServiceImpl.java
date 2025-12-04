@@ -128,6 +128,14 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
+    @Override
+    public List<Product> findByCategoryAndBuyer(String category, User buyer){
+        if(category.equals("ALL")){
+            return productRepository.findByBuyer(buyer);
+        }
+        return productRepository.findByCategoryAndBuyer(category, buyer);
+    }
+
     /**
      * Проверка доступа к продукту для конкретного пользователя
      */

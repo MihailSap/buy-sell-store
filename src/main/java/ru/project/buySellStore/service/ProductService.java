@@ -1,8 +1,5 @@
 package ru.project.buySellStore.service;
 
-import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
-import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
@@ -41,6 +38,11 @@ public interface ProductService {
      * @throws ProductNotFoundException если товара с указанным id не существует
      */
     Product findById(Long id, User user) throws ProductNotFoundException;
+
+    /**
+     * Получить все товары по категории и покупателю
+     */
+    List<Product> findByCategoryAndBuyer(String category, User buyer);
 
     /**
      * Удалить товар по id
