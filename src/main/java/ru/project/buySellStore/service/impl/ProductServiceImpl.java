@@ -160,6 +160,9 @@ public class ProductServiceImpl implements ProductService {
                 category, startDate, endDate);
     }
 
+    /**
+     * Получить период - первый и последний день
+     */
     private LocalDate[] getDateRange(String period) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = switch (period) {

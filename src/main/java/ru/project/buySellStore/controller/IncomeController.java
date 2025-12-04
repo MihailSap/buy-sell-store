@@ -28,8 +28,6 @@ public class IncomeController {
     /**
      * Создание контроллера с нужными зависимостями
      * @param incomeService сервис подсчета дохода
-     * @param authService
-     * @param productService
      */
     public IncomeController(IncomeService incomeService, AuthService authService, ProductService productService) {
         this.incomeService = incomeService;
