@@ -9,6 +9,7 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.dto.productView.ProductViewDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
@@ -52,22 +53,28 @@ public class ProductController {
 
     /**
      * Получение всех товаров, не считая архивных
+     * <p>Пользователь получает только свой товар<p>
      */
     @GetMapping
     @Transactional(readOnly = true)
-    public List<ProductDTO> findAll() {
-        return productService.findAll().stream()
-                .map(productMapper::toDto)
+    public List<ProductViewDTO> findAll() {
+        User user = authService.getAuthenticatedUser();
+        List<Product> products = productService.findAll(user);
+        return products.stream()
+                .map(p -> productMapper.toDtoByRole(p, user.getRole()))
                 .collect(Collectors.toList());
     }
 
     /**
      * Получение товара по id
+     * <p>Пользователь получает только свой товар<p>
      */
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
-    public ProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
-        return productMapper.toDto(productService.findById(id));
+    public ProductViewDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
+        User user = authService.getAuthenticatedUser();
+        Product product = productService.findById(id, user);
+        return productMapper.toDtoByRole(product, user.getRole());
     }
 
     /**
@@ -86,7 +93,8 @@ public class ProductController {
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setCategory(productDto.getCategory());
-        product.setSellerCost(productDto.getSupplierCost());
+        product.setSupplierCost(productDto.getSupplierCost());
+        product.setSupplier(user);
         productService.save(product);
         return String.format(
                 "Поставщик '%s' создал товар '%s'",

@@ -1,12 +1,7 @@
 package ru.project.buySellStore.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
-import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
@@ -18,7 +13,6 @@ import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для управления товаром
@@ -43,16 +37,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAll() {
+    public List<Product> findAll(User user) {
         return productRepository.findAll().stream()
-                .filter(product -> !product.isArchived())
-                .collect(Collectors.toList());
+                .filter(p -> !p.isArchived())
+                .filter(p -> hasAccess(p, user))
+                .toList();
     }
 
-    @Override
     public Product findById(Long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+    @Override
+    public Product findById(Long id, User user) throws ProductNotFoundException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        if (!hasAccess(product, user) || product.isArchived()) {
+            throw new ProductNotFoundException(id);
+        }
+
+        return product;
     }
 
     public void delete(Long id) throws ProductNotFoundException {
@@ -120,5 +126,16 @@ public class ProductServiceImpl implements ProductService {
         product.setBuyer(buyer);
 
         productRepository.save(product);
+    }
+
+    /**
+     * Проверка доступа к продукту для конкретного пользователя
+     */
+    private boolean hasAccess(Product product, User user) {
+        return switch (user.getRole()) {
+            case SUPPLIER -> product.getSupplier() != null && user.equals(product.getSupplier());
+            case SELLER   -> product.getSeller() != null && user.equals(product.getSeller());
+            case BUYER    -> product.getBuyer() != null && user.equals(product.getBuyer());
+        };
     }
 }
