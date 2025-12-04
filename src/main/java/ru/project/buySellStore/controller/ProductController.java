@@ -9,7 +9,7 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
-import ru.project.buySellStore.dto.productView.ProductViewDTO;
+import ru.project.buySellStore.dto.productView.BaseProductDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
@@ -57,7 +57,7 @@ public class ProductController {
      */
     @GetMapping
     @Transactional(readOnly = true)
-    public List<ProductViewDTO> findAll() {
+    public List<BaseProductDTO> findAll() {
         User user = authService.getAuthenticatedUser();
         List<Product> products = productService.findAll(user);
         return products.stream()
@@ -71,7 +71,7 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
-    public ProductViewDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
+    public BaseProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
         User user = authService.getAuthenticatedUser();
         Product product = productService.findById(id, user);
         return productMapper.toDtoByRole(product, user.getRole());
