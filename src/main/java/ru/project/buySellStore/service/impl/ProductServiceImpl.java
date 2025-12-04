@@ -12,6 +12,8 @@ import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
+
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -124,8 +126,54 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product.setBuyer(buyer);
+        product.setBoughtDate(LocalDate.now());
 
         productRepository.save(product);
+    }
+
+    @Override
+    public List<Product> findBySellerAndCategoryAndBoughtDateBetween(String category,
+                                                                    User seller, String period) {
+        LocalDate[] range = getDateRange(period);
+        LocalDate startDate = range[0];
+        LocalDate endDate = range[1];
+
+        if (category.equals("ALL")) {
+            return productRepository.findBySellerAndBoughtDateBetween(seller, startDate, endDate);
+        }
+        return productRepository.findBySellerAndCategoryAndBoughtDateBetween(seller,
+                category, startDate, endDate);
+    }
+
+
+    @Override
+    public List<Product> findBySupplierAndCategoryAndBoughtDateBetween(String category,
+                                                                     User supplier, String period) {
+        LocalDate[] range = getDateRange(period);
+        LocalDate startDate = range[0];
+        LocalDate endDate = range[1];
+
+        if (category.equals("ALL")) {
+            return productRepository.findBySupplierAndBoughtDateBetween(supplier, startDate, endDate);
+        }
+        return productRepository.findBySupplierAndCategoryAndBoughtDateBetween(supplier,
+                category, startDate, endDate);
+    }
+
+    /**
+     * Получить период - первый и последний день
+     */
+    private LocalDate[] getDateRange(String period) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = switch (period) {
+            case "TODAY" -> endDate;
+            case "LAST_WEEK" -> endDate.minusWeeks(1);
+            case "LAST_MONTH" -> endDate.minusMonths(1);
+            case "ALL" -> LocalDate.MIN;
+            default -> throw new IllegalArgumentException("Неправильный формат периода: " + period);
+        };
+
+        return new LocalDate[]{startDate, endDate};
     }
 
     /**
