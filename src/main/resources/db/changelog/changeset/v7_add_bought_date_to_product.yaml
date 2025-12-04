@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 9
+      author: vyacheslav_dzhabarov
+      changes:
+        - addColumn:
+            tableName: product
+            columns:
+              - column:
+                  name: bought_date
+                  type: DATE

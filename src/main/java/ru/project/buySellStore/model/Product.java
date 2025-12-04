@@ -2,6 +2,8 @@ package ru.project.buySellStore.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 /**
  *  Cущность товара
  */
@@ -32,6 +34,8 @@ public class Product extends BaseEntity{
     private User buyer;
 
     private boolean archived = false;
+
+    private LocalDate boughtDate;
 
     /**
      * Получить имя
@@ -126,7 +130,6 @@ public class Product extends BaseEntity{
 
     /**
      * Установить покупателя
-     * @param buyer
      */
     public void setBuyer(User buyer) {
         this.buyer = buyer;
@@ -158,5 +161,19 @@ public class Product extends BaseEntity{
      */
     public void setArchived(boolean archived) {
         this.archived = archived;
+    }
+
+    /**
+     * Получить день покупки
+     */
+    public LocalDate getBoughtDate() {
+        return boughtDate;
+    }
+
+    /**
+     * Назначить день покупки
+     */
+    public void setBoughtDate(LocalDate boughtDate) {
+        this.boughtDate = boughtDate;
     }
 }
