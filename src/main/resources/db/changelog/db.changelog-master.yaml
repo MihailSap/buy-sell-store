@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v5_add_seller_cost_to_product.yaml
   - include:
       file: db/changelog/changeset/v6_add_supplier_and_buyer_to_product.yaml
+  - include:
+      file: db/changelog/changeset/v7_add_bought_date_to_product.yaml

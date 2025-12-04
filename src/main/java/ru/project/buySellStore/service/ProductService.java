@@ -70,4 +70,19 @@ public interface ProductService {
      */
     void buyProduct(Long productId, User buyer)
       throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
+
+    /**
+     * Получить товары по продавцу, категории и временному промежутку
+     * <p>Если категория равна ALL - findBySellerAndBoughtDateBetween
+     */
+    List<Product> findBySellerAndCategoryAndBoughtDateBetween(String category,
+                                                             User seller, String period);
+
+    /**
+     * Получить товары по поставщику, категории и временному промежутку
+     *
+     * <p>Если категория равна ALL - findBySellerAndBoughtDateBetween
+     */
+    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(String category,
+                                                                User supplier, String period);
 }
