@@ -119,8 +119,20 @@ class ProductControllerTest {
         product2.setCategory("ELECTRONICS");
         product2.setSupplierCost(2000);
 
-        ProductSupplierDTO dto1 = new ProductSupplierDTO(product1);
-        ProductSupplierDTO dto2 = new ProductSupplierDTO(product2);
+        ProductSupplierDTO dto1 = new ProductSupplierDTO(
+                product1.getId(),
+                product1.getName(),
+                product1.getDescription(),
+                product1.getCategory(),
+                product1.getSupplierCost()
+        );
+        ProductSupplierDTO dto2 = new ProductSupplierDTO(
+                product2.getId(),
+                product2.getName(),
+                product2.getDescription(),
+                product2.getCategory(),
+                product2.getSupplierCost()
+        );
 
         Mockito.when(authService.getAuthenticatedUser()).thenReturn(user);
         Mockito.when(productService.findAll(user)).thenReturn(List.of(product1, product2));
@@ -155,7 +167,13 @@ class ProductControllerTest {
         product.setBuyer(buyerUser);
         Mockito.when(productService.findById(product.getId(), buyerUser)).thenReturn(product);
 
-        ProductBuyerDTO productBuyerDTO = new ProductBuyerDTO(product);
+        ProductBuyerDTO productBuyerDTO = new ProductBuyerDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getCategory(),
+                product.getSupplierCost()
+        );
 
         Mockito.when(productMapper.toDtoByRole(product, buyerUser.getRole())).thenReturn(productBuyerDTO);
 
