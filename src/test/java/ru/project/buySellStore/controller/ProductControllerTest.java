@@ -16,6 +16,8 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.ProductMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
@@ -27,7 +29,7 @@ import ru.project.buySellStore.service.impl.UserServiceImpl;
 import java.util.List;
 
 /**
- * Тесты для ProductController
+ * Тесты для {@link ProductController}
  */
 @WebMvcTest(ProductController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -57,6 +59,8 @@ class ProductControllerTest {
     private Product product;
 
     private ProductDTO productDTO;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Явное создание сущностей для тестов
@@ -146,7 +150,7 @@ class ProductControllerTest {
      * <p>Ожидается - корректное отображение свойств одного продукта в JSON-ответе</p>
      */
     @Test
-    void testFindById() throws Exception {
+    void testFindExistingProductById() throws Exception {
         Mockito.when(productService.findById(1L)).thenReturn(product);
         Mockito.when(productMapper.toDto(product)).thenReturn(productDTO);
         Mockito.when(productService.findById(1L))
@@ -166,8 +170,26 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет создание нового товара пользователем с ролью SUPPLIER
-     * Ожидается - тело ответа содержит сообщение "Поставщик 'supplier-user' создал товар 'name'"
+     * <b>Проверяет попытку получения несуществующего товара по {@code id}</b>
+     * <p>Ожидается - отображение ошибки и код 404</p>
+     */
+    @Test
+    void testFindNonExistingProductById() throws Exception {
+        Long productId = 1L;
+
+        Mockito.when(productService.findById(productId))
+                .thenThrow(new ProductNotFoundException(productId));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/products/{id}", productId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+
+        Mockito.verify(productService)
+                .findById(productId);
+    }
+
+    /**
+     * <b>Проверяет создание нового товара пользователем с ролью {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - тело ответа содержит сообщение: "Поставщик 'supplier-user' создал товар 'name'"</p>
      */
     @Test
     void testCreateBySupplier() throws Exception {
@@ -176,17 +198,18 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/add")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(productDTO)))
+                        .content(objectMapper.writeValueAsString(productDTO)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().string("Поставщик 'supplier-user' создал товар 'name'"));
+                .andExpect(MockMvcResultMatchers.content().string(
+                        "Поставщик 'supplier-user' создал товар 'name'"));
 
         Mockito.verify(productService, Mockito.times(1))
                 .save(Mockito.any(Product.class));
     }
 
     /**
-     * Проверяет появление исключения
-     * при попытке пользователя с ролью SELLER создать новый продукт
+     * <b>Проверяет создание нового товара пользователем с ролью {@link Role#SELLER}</b>
+     * <p>Ожидается - отображение ошибки и код 403</p>
      */
     @Test
     void testCreateBySeller() throws Exception {
@@ -195,7 +218,7 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/add")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(productDTO)))
+                        .content(objectMapper.writeValueAsString(productDTO)))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("Только поставщик может создавать товар!"));
@@ -204,8 +227,209 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет удаление товара по id пользователем с ролью SUPPLIER
-     * Ожидается - тело ответа содержит сообщение "Товар 'name' удален поставщиком 'supplier-user'"
+     * <b>Проверяет обновление своего товара пользователем с ролью {@link Role#SELLER}</b>
+     * <p>Ожидается - тело ответа содержит сообщение:
+     * "Продавец 'seller-user' изменил стоимость и описание товара 'name'!"</p>
+     */
+    @Test
+    void testUpdateBySellerLikeSeller() throws Exception {
+        ProductSellerUpdateDTO updateDTO = new ProductSellerUpdateDTO();
+        updateDTO.setDescription("description");
+        updateDTO.setSellerCost(1000);
+
+        product.setSeller(sellerUser);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(sellerUser);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+        Mockito.when(productService.save(product))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("Продавец 'seller-user' изменил стоимость и описание товара 'name'!"));
+
+        Mockito.verify(productService)
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяется обновление описания товара и цены продавца пользователем без роли {@link Role#SELLER}</b>
+     * <p>Ожидается - код 403 и сообщение: "Только продавец может менять описание и цену!"</p>
+     */
+    @Test
+    void testUpdateBySellerLikeNotSeller() throws Exception {
+        ProductSellerUpdateDTO updateDTO =
+                new ProductSellerUpdateDTO();
+
+        updateDTO.setDescription("description");
+        updateDTO.setSellerCost(1000);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Только продавец может менять описание и цену!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяется обновление товара, который принадлежит другому пользователю</b>
+     * <p>Ожидается - код 403 и сообщение: "Этот товар не назначен вам!"</p>
+     */
+    @Test
+    void testUpdateBySellerLikeAnotherSeller() throws Exception {
+        ProductSellerUpdateDTO updateDTO = new ProductSellerUpdateDTO();
+        updateDTO.setDescription("description");
+        updateDTO.setSellerCost(1000);
+
+        User anotherSeller = new User();
+        anotherSeller.setRole(Role.SELLER);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(anotherSeller);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Этот товар не назначен вам!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет обновление своего товара пользователем с ролью {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - тело ответа содержит сообщение:
+     * "Поставщик 'supplier-user' изменил товар 'New Name'"</p>
+     */
+    @Test
+    void testUpdateBySupplierLikeSupplier() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(2000);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
+        product.setSupplier(supplierUser);
+        Mockito.when(productService.findById(1L)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("Поставщик 'supplier-user' изменил товар 'New Name'"));
+
+        Mockito.verify(productService).save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет обновление товара пользователем с ролью отличной от {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - код 403 и сообщение:
+     * "Только поставщик может редактировать название, описание и изначальную цену товара!"</p>
+     */
+    @Test
+    void testUpdateBySupplierLikeNotSupplier() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value(
+                                "Только поставщик может редактировать название, описание и изначальную цену товара!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет обновление чужого товара пользователем с ролью {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - код 403 и сообщение: "Поставщик может изменять только свои товары!"</p>
+     */
+    @Test
+    void testUpdateBySupplierLikeNotOwner() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        User otherSupplier = new User();
+        otherSupplier.setId(2L);
+        otherSupplier.setLogin("other-supplier");
+        otherSupplier.setRole(Role.SUPPLIER);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
+        product.setSupplier(otherSupplier);
+        Mockito.when(productService.findById(1L)).thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик может изменять только свои товары!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет обновление товара после назначения продавца</b>
+     * <p>Ожидается - код 403 и сообщение: "Поставщик не может редактировать товар после назначения продавца!"</p>
+     */
+    @Test
+    void testUpdateBySupplierAfterSellerAssigned() throws Exception {
+        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
+        updateDTO.setName("New Name");
+        updateDTO.setDescription("New Description");
+        updateDTO.setSupplierCost(101);
+
+        product.setSupplier(supplierUser);
+        product.setSeller(sellerUser);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик не может редактировать товар после назначения продавца!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .save(Mockito.any(Product.class));
+    }
+
+    /**
+     * <b>Проверяет удаление товара по id пользователем с ролью {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - тело ответа содержит сообщение "Товар 'name' удален поставщиком 'supplier-user'"</p>
      */
     @Test
     void testDeleteBySupplier() throws Exception {
@@ -221,16 +445,42 @@ class ProductControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .string("Товар 'name' удален поставщиком 'supplier-user'"));
 
-        Mockito.verify(productService, Mockito.times(1))
+        Mockito.verify(productService)
                 .delete(1L);
     }
 
     /**
-     * Проверяет удаление товара по id пользователем с ролью SELLER
-     * Ожидается - тело ответа содержит сообщение "Только поставщик может удалять товар!"
+     * <b>Проверяет удаление чужого товара по {@code id} пользователем с ролью {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - код 403 и сообщение: "Поставщик может удалять только свой товар!"</p>
      */
     @Test
-    void testDeleteBySeller() throws Exception {
+    void testDeleteByAnotherSupplier() throws Exception {
+        User anotherSupplier = new User();
+        anotherSupplier.setId(9L);
+        anotherSupplier.setRole(Role.SUPPLIER);
+
+        product.setSupplier(anotherSupplier);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/products/1"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик может удалять только свой товар!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .delete(Mockito.anyLong());
+    }
+
+    /**
+     * <b>Проверяет удаление товара по {@code id} пользователем с ролью {@link Role#SELLER}</b>
+     * <p>Ожидается - код 403 и сообщение "Только поставщик может удалять товар!"</p>
+     */
+    @Test
+    void testDeleteByNotSupplier() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
         Mockito.when(productService.findById(1L))
@@ -251,12 +501,58 @@ class ProductControllerTest {
      */
     @Test
     void testArchive() throws Exception {
+        Mockito.doNothing()
+                .when(productService)
+                .archive(1L);
+
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/archive"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Товар добавлен в архив"));
 
-        Mockito.verify(productService, Mockito.times(1))
+        Mockito.verify(productService)
                 .archive(1L);
+    }
+
+    /**
+     * <b>Проверяется архивирование ранее архивированного товара</b>
+     * <b>Ожидается - код 409 и сообщение: "Товар с id = 1 уже находится в архиве"</b>
+     */
+    @Test
+    void testArchiveArchivedProduct() throws Exception {
+        Long productId = 1L;
+
+        Mockito.doThrow(new ProductArchiveException(productId))
+                .when(productService)
+                .archive(productId);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/archive", productId))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар с id = 1 уже находится в архиве"));
+
+        Mockito.verify(productService)
+                .archive(productId);
+    }
+
+    /**
+     * <b>Проверяется архивирование несуществующего товара</b>
+     * <b>Ожидается - код 404 и сообщение: "Товар с id = 1 не найден"</b>
+     */
+    @Test
+    void testArchiveNonExistingProduct() throws Exception {
+        Long productId = 1L;
+
+        Mockito.doThrow(new ProductNotFoundException(productId))
+                .when(productService)
+                .archive(productId);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/archive", productId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар с id = 1 не найден"));
+
+        Mockito.verify(productService)
+                .archive(productId);
     }
 
     /**
@@ -265,6 +561,10 @@ class ProductControllerTest {
      */
     @Test
     void testRestore() throws Exception {
+        Mockito.doNothing()
+                .when(productService)
+                .restore(1L);
+
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/restore"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(
@@ -277,14 +577,56 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет определение продавца для товара.
-     * Ожидается - тело ответа содержит сообщение "Продавец 'seller-user' назначен на товар 'name'"
+     * <b>Проверяется удаление из архива не архивированного товара</b>
+     * <b>Ожидается - код 409 и сообщение: "Товар с id = 1 не находится в архиве"</b>
+     */
+    @Test
+    void testRestoreNotArchivedProduct() throws Exception {
+        Long productId = 1L;
+
+        Mockito.doThrow(new ProductRestoreException(productId))
+                .when(productService)
+                .restore(productId);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/restore", productId))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар c id = 1 уже доступен и не находится в архиве"));
+
+        Mockito.verify(productService)
+                .restore(productId);
+    }
+
+    /**
+     * <b>Проверяется удаление из архива несуществующего товара</b>
+     * <b>Ожидается - код 404 и сообщение: "Товар с id = 1 не найден"</b>
+     */
+    @Test
+    void testRestoreNonExistingProduct() throws Exception {
+        Long productId = 1L;
+
+        Mockito.doThrow(new ProductNotFoundException(productId))
+                .when(productService)
+                .restore(productId);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/restore", productId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар с id = 1 не найден"));
+
+        Mockito.verify(productService)
+                .restore(productId);
+    }
+
+    /**
+     * <b>Проверяет определение продавца для товара</b>
+     * <p>Ожидается - тело ответа содержит сообщение "Продавец 'seller-user' назначен на товар 'name'"</p>
      */
     @Test
     void testAssignSellerBySupplier() throws Exception {
         AssignSellerDTO assignSellerDTO = new AssignSellerDTO(2L);
-
         product.setSupplier(supplierUser);
+
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(supplierUser);
         Mockito.when(userService.getUserById(2L))
@@ -294,20 +636,49 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(assignSellerDTO)))
+                        .content(objectMapper.writeValueAsString(assignSellerDTO)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .string("Продавец 'seller-user' назначен на товар 'name'"));
-        Mockito.verify(productService, Mockito.times(1))
+        Mockito.verify(productService)
                 .assignSeller(product, sellerUser);
     }
 
     /**
-     * Проверяет определение продавца для товара
-     * Ожидается - тело ответа содержит сообщение "Только поставщик может назначать продавца на товар"
+     * <b>Проверяет определение продавца для чужого товара</b>
+     * <p>Ожидается - код 403 и сообщение "Поставщик может назначать продавца только на свой товар"</p>
      */
     @Test
-    void testAssignSellerBySeller() throws Exception {
+    void testAssignSellerByAnotherSupplier() throws Exception {
+        User anotherSupplier = new User();
+        anotherSupplier.setId(9L);
+        anotherSupplier.setRole(Role.SUPPLIER);
+        product.setSupplier(anotherSupplier);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+        Mockito.when(userService.getUserById(2L))
+                .thenReturn(sellerUser);
+        Mockito.when(productService.findById(1L))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignSellerDTO(2L))))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Поставщик может назначать продавца только на свой товар"));
+        Mockito.verify(productService, Mockito.never())
+                .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
+    }
+
+
+    /**
+     * <b>Проверяет определение продавца для товара пользователем без роли {@link Role#SUPPLIER}</b>
+     * <p>Ожидается - код 403 и сообщение: "Только поставщик может назначать продавца на товар"</p>
+     */
+    @Test
+    void testAssignSellerByNotSupplier() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
         Mockito.when(userService.getUserById(2L))
@@ -317,7 +688,7 @@ class ProductControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(new AssignSellerDTO(2L))))
+                        .content(objectMapper.writeValueAsString(new AssignSellerDTO(2L))))
                 .andExpect(MockMvcResultMatchers.status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
                         .value("Только поставщик может назначать продавца на товар"));
@@ -326,66 +697,75 @@ class ProductControllerTest {
     }
 
     /**
-     * Проверяет успешное обновление товара продавцом
+     * <b>Проверяет назначение несуществующего продавца на товар</b>
+     * <p>Ожидается - код 404 и сообщение "Пользователь с id = 2 не найден"</p>
      */
     @Test
-    void testUpdateBySeller() throws Exception {
-        ProductSellerUpdateDTO updateDTO =
-                new ProductSellerUpdateDTO();
+    void testAssignNonExistingSeller() throws Exception {
+        Long productId = 1L;
+        Long nonExistingUserId = 2L;
+        product.setSupplier(supplierUser);
 
-        updateDTO.setDescription("description");
-        updateDTO.setSellerCost(1000);
         Mockito.when(authService.getAuthenticatedUser())
-                .thenReturn(sellerUser);
+                .thenReturn(supplierUser);
+        Mockito.doThrow(new UserNotFoundException(nonExistingUserId))
+                .when(userService)
+                .getUserById(nonExistingUserId);
 
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(productId))
                 .thenReturn(product);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/assign-seller", productId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("Продавец 'seller-user' изменил стоимость и описание товара 'name'!"));
-
-        Mockito.verify(productService, Mockito.times(1))
-                .save(Mockito.any(Product.class));
-    }
-
-    /**
-     * Проверяет обновление товара НЕ продавцом
-     */
-    @Test
-    void testUpdateByNonSeller() throws Exception {
-        ProductSellerUpdateDTO updateDTO =
-                new ProductSellerUpdateDTO();
-
-        updateDTO.setDescription("description");
-        updateDTO.setSellerCost(1000);
-        Mockito.when(authService.getAuthenticatedUser())
-                .thenReturn(buyerUser);
-        Mockito.when(productService.findById(1L))
-                .thenReturn(product);
-
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                        .content(objectMapper.writeValueAsString(new AssignSellerDTO(nonExistingUserId))))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
-                        .value("Только продавец может менять описание и цену!"));
+                        .value("Пользователь с id = 2 не найден"));
 
+        Mockito.verify(userService)
+                .getUserById(nonExistingUserId);
         Mockito.verify(productService, Mockito.never())
-                .save(Mockito.any(Product.class));
+                .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
     }
 
     /**
-     * Проверяет успешную покупку товара покупателем
+     * <b>Проверяет назначение продавца на несуществующий товар</b>
+     * <p>Ожидается - код 404 и сообщение "Товар с id = 1 не найден"</p>
+     */
+    @Test
+    void testAssignSellerOnNonExistingProduct() throws Exception{
+        Long productId = 1L;
+        Long sellerId = 2L;
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+        Mockito.when(userService.getUserById(sellerId))
+                .thenReturn(sellerUser);
+        Mockito.doThrow(new ProductNotFoundException(productId))
+                .when(productService)
+                .findById(productId);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/assign-seller", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignSellerDTO(sellerId))))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар с id = 1 не найден"));
+
+        Mockito.verify(productService)
+                .findById(productId);
+        Mockito.verify(productService, Mockito.never())
+                .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
+    }
+
+    /**
+     * <b>Проверяет успешную покупку товара пользователем с ролью {@link Role#BUYER}</b>
+     * <p>Ожидается - сообщение: "Покупатель 'buyer-user' купил товар 'name'"</p>
      */
     @Test
     void testBuyByBuyer() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(buyerUser);
-
         Mockito.when(productService.findById(1L))
                 .thenReturn(product);
 
@@ -394,15 +774,16 @@ class ProductControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .string("Покупатель 'buyer-user' купил товар 'name'"));
 
-        Mockito.verify(productService, Mockito.times(1))
+        Mockito.verify(productService)
                 .buyProduct(1L, buyerUser);
     }
 
     /**
-     * Проверяет покупку товара НЕ покупателем
+     * <b>Проверяет успешную покупку товара пользователем без роли {@link Role#BUYER}</b>
+     * <p>Ожидается - код 403 и сообщение: "Покупать товары может только покупатель!"</p>
      */
     @Test
-    void testBuyByNonBuyer() throws Exception {
+    void testBuyByNotBuyer() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
 
@@ -412,106 +793,99 @@ class ProductControllerTest {
                         .value("Покупать товары может только покупатель!"));
 
         Mockito.verify(productService, Mockito.never())
-                .buyProduct(Mockito.anyLong(), Mockito.any());
+                .buyProduct(Mockito.anyLong(), Mockito.any(User.class));
     }
 
     /**
-     * Проверяет успешное обновление товара поставщиком
+     * <b>Проверяет покупку архивированного товара</b>
+     * <p>Ожидается - код 409 и сообщение: "Товар с id = 1 уже находится в архиве"</p>
      */
     @Test
-    void testUpdateBySupplierSuccess() throws Exception {
-        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
-        updateDTO.setName("New Name");
-        updateDTO.setDescription("New Description");
-        updateDTO.setSupplierCost(2000);
+    void testBuyArchivedProduct() throws Exception{
+        Long productId = 1L;
 
-        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
-        product.setSupplier(supplierUser);
-        Mockito.when(productService.findById(1L)).thenReturn(product);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+        Mockito.doThrow(new ProductArchiveException(productId))
+                .when(productService)
+                .buyProduct(productId, buyerUser);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("Поставщик 'supplier-user' изменил товар 'New Name'"));
-
-        Mockito.verify(productService).save(Mockito.any(Product.class));
-    }
-
-    /**
-     * Проверяет попытку обновления товара пользователем с ролью, отличной от SUPPLIER
-     */
-    @Test
-    void testUpdateBySupplierNotSupplierRole() throws Exception {
-        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
-        updateDTO.setName("New Name");
-        updateDTO.setDescription("New Description");
-        updateDTO.setSupplierCost(101);
-
-        Mockito.when(authService.getAuthenticatedUser()).thenReturn(buyerUser);
-
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/buy", productId))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
-                        .value("Только поставщик может редактировать товар!"));
+                        .value("Товар с id = 1 уже находится в архиве"));
 
-        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
+        Mockito.verify(productService)
+                .buyProduct(productId, buyerUser);
     }
 
     /**
-     * Проверяет попытку обновления товара другим поставщиком (не владельцем товара)
+     * <b>Проверяет покупку товара, продавец на который не назначен</b>
+     * <p>Ожидается - код 409 и сообщение: "Товар с id = 1 не имеет назначенного продавца"</p>
      */
     @Test
-    void testUpdateBySupplierNotOwner() throws Exception {
-        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
-        updateDTO.setName("New Name");
-        updateDTO.setDescription("New Description");
-        updateDTO.setSupplierCost(101);
+    void testBuyProductWithNonAssignedSeller() throws Exception{
+        Long productId = 1L;
 
-        User otherSupplier = new User();
-        otherSupplier.setId(2L);
-        otherSupplier.setLogin("other-supplier");
-        otherSupplier.setRole(Role.SUPPLIER);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
 
-        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
-        product.setSupplier(otherSupplier);
-        Mockito.when(productService.findById(1L)).thenReturn(product);
+        Mockito.doThrow(new ProductWithoutSellerException(productId))
+                .when(productService)
+                .buyProduct(productId, buyerUser);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/buy", productId))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
-                        .value("Поставщик может изменять только свои товары!"));
+                        .value("Товар с id = 1 не имеет назначенного продавца"));
 
-        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
+        Mockito.verify(productService)
+                .buyProduct(productId, buyerUser);
     }
 
     /**
-     * Проверяет попытку обновления товара после назначения продавца
+     * <b>Проверяет покупку несуществующего товара</b>
+     * <p>Ожидается - код 404 и сообщение: "Товар с id = 1 не найден"</p>
      */
     @Test
-    void testUpdateBySupplierAfterSellerAssigned() throws Exception {
-        ProductSupplierUpdateDTO updateDTO = new ProductSupplierUpdateDTO();
-        updateDTO.setName("New Name");
-        updateDTO.setDescription("New Description");
-        updateDTO.setSupplierCost(101);
+    void testBuyNonExistingProduct() throws Exception{
+        Long productId = 1L;
 
-        product.setSupplier(supplierUser);
-        product.setSeller(sellerUser);
-        Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
-        Mockito.when(productService.findById(1L)).thenReturn(product);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+        Mockito.doThrow(new ProductNotFoundException(productId))
+                .when(productService)
+                .buyProduct(productId, buyerUser);
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updateDTO)))
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/buy", productId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message")
-                        .value("Поставщик не может редактировать товар после назначения продавца!"));
+                        .value("Товар с id = 1 не найден"));
 
-        Mockito.verify(productService, Mockito.never()).save(Mockito.any(Product.class));
+        Mockito.verify(productService)
+                .buyProduct(productId, buyerUser);
+    }
+
+    /**
+     * <b>Проверяет покупку купленного товара</b>
+     * <p>Ожидается - код 409 и сообщение: "Товар с id = 1 уже куплен"</p>
+     */
+    @Test
+    void testBuyAlreadyBoughtProduct() throws Exception{
+        Long productId = 1L;
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
+        Mockito.doThrow(new ProductAlreadyBoughtException(productId))
+                .when(productService)
+                .buyProduct(productId, buyerUser);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/buy", productId))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Товар с id = 1 уже куплен"));
+
+        Mockito.verify(productService)
+                .buyProduct(productId, buyerUser);
     }
 }

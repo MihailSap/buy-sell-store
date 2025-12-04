@@ -1,5 +1,6 @@
 package ru.project.buySellStore.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Сервис для управления сущностью товара
+ * Сервис для управления товаром
  */
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
      * @param productRepository репозиторий для работы с сущностью Товара
      */
     @Autowired
-    public ProductServiceImpl(ProductRepository productRepository, UserServiceImpl userServiceImpl) {
+    public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
@@ -44,7 +45,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findAll() {
         return productRepository.findAll().stream()
-                .filter(product -> !product.isArchived()).collect(Collectors.toList());
+                .filter(product -> !product.isArchived())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -98,21 +100,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void buyProduct(Long id, User buyer) throws ProductArchiveException,
+    public void buyProduct(Long productId, User buyer) throws ProductArchiveException,
             ProductWithoutSellerException, ProductAlreadyBoughtException,
             ProductNotFoundException {
-        Product product = findById(id);
+        Product product = findById(productId);
 
         if (product.isArchived()) {
-            throw new ProductArchiveException(id);
+            throw new ProductArchiveException(productId);
         }
 
         if (product.getSeller() == null) {
-            throw new ProductWithoutSellerException(id);
+            throw new ProductWithoutSellerException(productId);
         }
 
         if (product.getBuyer() != null) {
-            throw new ProductAlreadyBoughtException(id);
+            throw new ProductAlreadyBoughtException(productId);
         }
 
         product.setBuyer(buyer);

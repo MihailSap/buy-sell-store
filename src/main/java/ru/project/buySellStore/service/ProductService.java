@@ -57,5 +57,6 @@ public interface ProductService {
     /**
      * Покупка товара
      */
-    void buyProduct(Long id, User buyer) throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
+    void buyProduct(Long productId, User buyer)
+      throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
 }
