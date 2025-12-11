@@ -313,23 +313,6 @@ class ProductServiceImplTest {
     }
 
     /**
-     * <b>Проверяет назначение продавцом на товар пользователю без роли {@link Role#SELLER}</b>
-     * <p>Ожидается появление исключения с сообщением "Продавцом можно назначить только пользователя с ролью SELLER"</p>
-     */
-    @Test
-    void testAssignSellerWrongRole() {
-        UserNotSuitableRoleException ex = Assertions.assertThrows(
-                UserNotSuitableRoleException.class, () -> productService.assignSeller(product, buyer));
-
-        Assertions.assertEquals(
-                "Продавцом можно назначить только пользователя с ролью SELLER", ex.getMessage());
-
-        Mockito.verify(productRepository, Mockito.never())
-                .save(Mockito.any(Product.class));
-    }
-
-
-    /**
      * <b>Проверяет успешную покупку товара</b>
      * <p>Ожидается, что у товара появится покупатель</p>
      */

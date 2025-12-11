@@ -9,7 +9,7 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
-import ru.project.buySellStore.dto.productView.BaseProductDTO;
+import ru.project.buySellStore.dto.ViewProductDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
@@ -57,11 +57,11 @@ public class ProductController {
      */
     @GetMapping
     @Transactional(readOnly = true)
-    public List<BaseProductDTO> findAll() {
+    public List<ViewProductDTO> findAll() {
         User user = authService.getAuthenticatedUser();
         List<Product> products = productService.findAll(user);
         return products.stream()
-                .map(p -> productMapper.toDtoByRole(p, user.getRole()))
+                .map(p -> productMapper.toDto(p, user.getRole()))
                 .collect(Collectors.toList());
     }
 
@@ -71,10 +71,10 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
-    public BaseProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
+    public ViewProductDTO findById(@PathVariable("id") Long id) throws ProductNotFoundException {
         User user = authService.getAuthenticatedUser();
         Product product = productService.findById(id, user);
-        return productMapper.toDtoByRole(product, user.getRole());
+        return productMapper.toDto(product, user.getRole());
     }
 
     /**
