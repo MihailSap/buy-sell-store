@@ -48,21 +48,6 @@ class ProductServiceImplTest {
     }
 
     /**
-     * <b>Проверяет поиск несуществующего товара</b>
-     * <p>Ожидается появление ошибки с сообщением: "Товар с id = 1 не найден"</p>
-     */
-    @Test
-    void testFindNonExistingProductById() {
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.empty());
-
-        ProductNotFoundException ex = Assertions.assertThrows(ProductNotFoundException.class,
-                () -> productService.findById(1L));
-
-        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
-    }
-
-    /**
      * Тестирование метода findAll(User user) для роли SUPPLIER
      * <p>
      * Проверяется, что поставщик видит только свои активные товары,

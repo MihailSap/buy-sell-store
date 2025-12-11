@@ -13,20 +13,6 @@ import ru.project.buySellStore.model.Role;
 public class ProductMapper {
 
     /**
-     * Преобразование товара из сущности в DTO
-     * <p>Нужен для создания и обновления товара</>
-     */
-    public ProductDTO toDto(Product product) {
-        return new ProductDTO(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getCategory(),
-                product.getSupplierCost()
-        );
-    }
-
-    /**
      * Преобразование товара в DTO для конкретной роли пользователя
      */
     public BaseProductDTO toDtoByRole(Product product, Role role) {

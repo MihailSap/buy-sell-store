@@ -115,7 +115,7 @@ public class ProductController {
             throw new AccessDeniedException("Только продавец может менять описание и цену!");
         }
 
-        Product product = productService.findById(id);
+        Product product = productService.findById(id, user);
         if (product.getSeller() == null || !product.getSeller().equals(user)) {
             throw new AccessDeniedException("Этот товар не назначен вам!");
         }
@@ -124,7 +124,7 @@ public class ProductController {
         productService.save(product);
         return String.format(
                 "Продавец '%s' изменил стоимость и описание товара '%s'!",
-                user.getLogin(), productService.findById(id).getName()
+                user.getLogin(), productService.findById(id, user).getName()
         );
     }
 
@@ -145,7 +145,7 @@ public class ProductController {
                     "Только поставщик может редактировать название, описание и изначальную цену товара!");
         }
 
-        Product product = productService.findById(id);
+        Product product = productService.findById(id, supplier);
 
         if (!product.getSupplier().equals(supplier)) {
             throw new AccessDeniedException("Поставщик может изменять только свои товары!");
@@ -180,7 +180,7 @@ public class ProductController {
             throw new AccessDeniedException("Только поставщик может удалять товар!");
         }
 
-        Product product = productService.findById(productId);
+        Product product = productService.findById(productId, user);
         if(!user.equals(product.getSupplier())) {
             throw new AccessDeniedException("Поставщик может удалять только свой товар!");
         }
@@ -230,7 +230,13 @@ public class ProductController {
         }
 
         User seller = userService.getUserById(assignSellerDTO.getSellerId());
-        Product product = productService.findById(productId);
+
+        if(!seller.getRole().equals(Role.SELLER)) {
+            throw new UserNotSuitableRoleException(
+                    "Продавцом можно назначить только пользователя с ролью SELLER");
+        }
+
+        Product product = productService.findById(productId, user);
         if(!user.equals(product.getSupplier())){
             throw new AccessDeniedException(
                     "Поставщик может назначать продавца только на свой товар");
@@ -257,7 +263,7 @@ public class ProductController {
         return String.format(
                 "Покупатель '%s' купил товар '%s'",
                 buyer.getLogin(),
-                productService.findById(id).getName()
+                productService.findById(id, buyer).getName()
         );
     }
 }
