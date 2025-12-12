@@ -7,16 +7,61 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "product")
-public class Product  extends BaseEntity{
+public class Product extends BaseEntity{
 
+    /**
+     * Название
+     */
     private String name;
 
+    /**
+     * Описание
+     */
     private String description;
 
+    /**
+     * Категория
+     */
     private String category;
 
-    private Integer cost;
+    /**
+     * Цена поставщика
+     */
+    private Integer supplierCost;
 
+    /**
+     * Цена продавца
+     */
+    private Integer sellerCost;
+
+    /**
+     * Продавец
+     */
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
+    /**
+     * Поставщик
+     */
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private User supplier;
+
+    /**
+     * Покупатель
+     */
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
+
+    /**
+     * Флаг, указывающий, что товар находится в архиве
+     * Если true — товар считается архивным и не должен отображаться в списках
+     * Если false — товар активен и доступен для операций
+     *
+     * По умолчанию false
+     */
     private boolean archived = false;
 
     /**
@@ -62,17 +107,74 @@ public class Product  extends BaseEntity{
     }
 
     /**
-     * Получить стоимость
+     * Получить стоимость поставщика
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
-     * Установить стоимость
+     * Установить стоимость поставщика
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer cost) {
+        this.supplierCost = cost;
+    }
+
+    /**
+     * Получить продавца данного товара
+     */
+    public User getSeller() {
+        return seller;
+    }
+
+    /**
+     * Установить продавца данного товара
+     */
+    public void setSeller(User seller) {
+        this.seller = seller;
+    }
+
+    /**
+     * Получить поставщика
+     */
+    public User getSupplier() {
+        return supplier;
+    }
+
+    /**
+     * Установить поставщика
+     */
+    public void setSupplier(User supplier) {
+        this.supplier = supplier;
+    }
+
+    /**
+     * Получить покупателя
+     */
+    public User getBuyer() {
+        return buyer;
+    }
+
+    /**
+     * Установить покупателя
+     * @param buyer
+     */
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
+    }
+
+    /**
+     * Получить стоимость продавца
+     */
+    public Integer getSellerCost() {
+        return sellerCost;
+    }
+
+    /**
+     * Установить стоимость продавца
+     */
+    public void setSellerCost(Integer sellerCost) {
+        this.sellerCost = sellerCost;
     }
 
     /**

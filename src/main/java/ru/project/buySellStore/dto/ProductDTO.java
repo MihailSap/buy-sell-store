@@ -7,8 +7,14 @@ import jakarta.validation.constraints.*;
  */
 public class ProductDTO {
 
+    /**
+     * id Товара
+     */
     private Long id;
 
+    /**
+     * Название
+     */
     @NotBlank(message = "Название не может быть пустым")
     @Size(max = 30, message = "Название не должно превышать 30 символов")
     @Pattern(
@@ -17,9 +23,15 @@ public class ProductDTO {
     )
     private String name;
 
+    /**
+     * Описание
+     */
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
 
+    /**
+     * Категория
+     */
     @NotBlank(message = "Категория не может быть пустой")
     @Pattern(
             regexp = "^[A-Za-zА-Яа-я ]+$",
@@ -27,34 +39,37 @@ public class ProductDTO {
     )
     private String category;
 
+    /**
+     * Цена поставщика, который создает продукт
+     */
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
-    private Integer cost;
+    private Integer supplierCost;
 
     /**
      * Конструктор для создания продукта
      * @param name название
      * @param description описание
      * @param category категория
-     * @param cost цена
+     * @param supplierCost цена
      */
-    public ProductDTO(String name, String description, String category, Integer cost) {
+    public ProductDTO(String name, String description, String category, Integer supplierCost) {
         this.name = name;
         this.description = description;
         this.category = category;
-        this.cost = cost;
+        this.supplierCost = supplierCost;
     }
 
     /**
      * Конструктор с id и всем полями для получения информации
      * о товаре
      */
-    public ProductDTO(Long id, String name, String description, String category, Integer cost) {
+    public ProductDTO(Long id, String name, String description, String category, Integer supplierCost) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.category = category;
-        this.cost = cost;
+        this.supplierCost = supplierCost;
     }
 
     /**
@@ -122,14 +137,14 @@ public class ProductDTO {
     /**
      * Получить стоимость
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
      * Установить стоимость
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer supplierCost) {
+        this.supplierCost = supplierCost;
     }
 }

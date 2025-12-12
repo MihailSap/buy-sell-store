@@ -1,11 +1,12 @@
 package ru.project.buySellStore.service;
 
 import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductUpdateDTO;
-import ru.project.buySellStore.exception.productEx.ProductArchiveException;
-import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
-import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
+import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
+import ru.project.buySellStore.exception.productEx.*;
+import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.User;
 
 import java.util.List;
 
@@ -21,14 +22,17 @@ public interface ProductService {
 
     /**
      * Получить все товары
+     * <p>Пользователь получает только свои неархивные товары</>
      */
-    List<Product> findAll();
+    List<Product> findAll(User user);
 
     /**
      * Получить товар по id
+     * <p>
+     * Нужен, чтобы пользователь получил только свои продукты
      * @throws ProductNotFoundException если товара с указанным id не существует
      */
-    Product findById(Long id) throws ProductNotFoundException;
+    Product findById(Long id, User user) throws ProductNotFoundException;
 
     /**
      * Удалить товар по id
@@ -47,4 +51,15 @@ public interface ProductService {
      * @throws ProductRestoreException при попытке удалить из архива товар, которого там нет
      */
     void restore(Long id) throws ProductNotFoundException, ProductRestoreException;
+
+    /**
+     * Назначить продавца на товар
+     */
+    void assignSeller(Product product, User seller) throws UserNotSuitableRoleException;
+
+    /**
+     * Покупка товара
+     */
+    void buyProduct(Long productId, User buyer)
+      throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
 }
