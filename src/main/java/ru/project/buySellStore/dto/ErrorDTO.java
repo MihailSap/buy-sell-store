@@ -5,6 +5,9 @@ package ru.project.buySellStore.dto;
  */
 public class ErrorDTO {
 
+    /**
+     * Сообщение об ошибке
+     */
     private String message;
 
     /**
