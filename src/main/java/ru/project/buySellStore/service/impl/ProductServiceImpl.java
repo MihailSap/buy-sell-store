@@ -3,12 +3,10 @@ package ru.project.buySellStore.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.project.buySellStore.exception.productEx.*;
-import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
 import ru.project.buySellStore.model.Product;
-import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
@@ -31,6 +29,17 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Получить товар по id
+     * <p>
+     * Нужен для внутренней работы приложения
+     * @throws ProductNotFoundException если товара с указанным id не существует
+     */
+    private Product findById(Long id) throws ProductNotFoundException {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
     @Override
     public Product save(Product product) {
         return productRepository.save(product);
@@ -42,11 +51,6 @@ public class ProductServiceImpl implements ProductService {
                 .filter(p -> !p.isArchived())
                 .filter(p -> hasAccess(p, user))
                 .toList();
-    }
-
-    public Product findById(Long id) throws ProductNotFoundException {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override
@@ -61,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
+    @Override
     public void delete(Long id) throws ProductNotFoundException {
         try{
             Product product = findById(id);
@@ -95,12 +100,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void assignSeller(Product product, User seller) throws UserNotSuitableRoleException {
-        if(!seller.getRole().equals(Role.SELLER)) {
-            throw new UserNotSuitableRoleException(
-                    "Продавцом можно назначить только пользователя с ролью SELLER");
-        }
-
+    public void assignSeller(Product product, User seller) {
         product.setSeller(seller);
         productRepository.save(product);
     }

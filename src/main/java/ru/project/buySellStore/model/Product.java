@@ -9,28 +9,59 @@ import jakarta.persistence.*;
 @Table(name = "product")
 public class Product extends BaseEntity{
 
+    /**
+     * Название
+     */
     private String name;
 
+    /**
+     * Описание
+     */
     private String description;
 
+    /**
+     * Категория
+     */
     private String category;
 
+    /**
+     * Цена поставщика
+     */
     private Integer supplierCost;
 
+    /**
+     * Цена продавца
+     */
     private Integer sellerCost;
 
+    /**
+     * Продавец
+     */
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
 
+    /**
+     * Поставщик
+     */
     @ManyToOne
     @JoinColumn(name = "supplier_id")
     private User supplier;
 
+    /**
+     * Покупатель
+     */
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private User buyer;
 
+    /**
+     * Флаг, указывающий, что товар находится в архиве
+     * Если true — товар считается архивным и не должен отображаться в списках
+     * Если false — товар активен и доступен для операций
+     *
+     * По умолчанию false
+     */
     private boolean archived = false;
 
     /**

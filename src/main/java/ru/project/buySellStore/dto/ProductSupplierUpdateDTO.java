@@ -7,6 +7,9 @@ import jakarta.validation.constraints.*;
  */
 public class ProductSupplierUpdateDTO {
 
+    /**
+     * Название
+     */
     @NotBlank(message = "Название не может быть пустым")
     @Size(max = 30, message = "Название не должно превышать 30 символов")
     @Pattern(
@@ -15,9 +18,15 @@ public class ProductSupplierUpdateDTO {
     )
     private String name;
 
+    /**
+     * Описание
+     */
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
 
+    /**
+     * Цена поставщика
+     */
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
     private Integer supplierCost;

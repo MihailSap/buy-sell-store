@@ -29,14 +29,6 @@ public interface ProductService {
     /**
      * Получить товар по id
      * <p>
-     * Нужен для внутренней работы приложения
-     * @throws ProductNotFoundException если товара с указанным id не существует
-     */
-    Product findById(Long id) throws ProductNotFoundException;
-
-    /**
-     * Получить товар по id
-     * <p>
      * Нужен, чтобы пользователь получил только свои продукты
      * @throws ProductNotFoundException если товара с указанным id не существует
      */

@@ -16,8 +16,7 @@ import ru.project.buySellStore.dto.AssignSellerDTO;
 import ru.project.buySellStore.dto.ProductDTO;
 import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
 import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
-import ru.project.buySellStore.dto.productView.ProductBuyerDTO;
-import ru.project.buySellStore.dto.productView.ProductSupplierDTO;
+import ru.project.buySellStore.dto.ViewProductDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotFoundException;
 import ru.project.buySellStore.mapper.ProductMapper;
@@ -70,14 +69,17 @@ class ProductControllerTest {
     @BeforeEach
     void setUp(){
         supplierUser = new User();
+        supplierUser.setId(1L);
         supplierUser.setLogin("supplier-user");
         supplierUser.setRole(Role.SUPPLIER);
 
         sellerUser = new User();
+        sellerUser.setId(2L);
         sellerUser.setLogin("seller-user");
         sellerUser.setRole(Role.SELLER);
 
         buyerUser = new User();
+        buyerUser.setId(3L);
         buyerUser.setLogin("buyer-user");
         buyerUser.setRole(Role.BUYER);
 
@@ -119,14 +121,14 @@ class ProductControllerTest {
         product2.setCategory("ELECTRONICS");
         product2.setSupplierCost(2000);
 
-        ProductSupplierDTO dto1 = new ProductSupplierDTO(
+        ViewProductDTO dto1 = new ViewProductDTO(
                 product1.getId(),
                 product1.getName(),
                 product1.getDescription(),
                 product1.getCategory(),
                 product1.getSupplierCost()
         );
-        ProductSupplierDTO dto2 = new ProductSupplierDTO(
+        ViewProductDTO dto2 = new ViewProductDTO(
                 product2.getId(),
                 product2.getName(),
                 product2.getDescription(),
@@ -136,21 +138,21 @@ class ProductControllerTest {
 
         Mockito.when(authService.getAuthenticatedUser()).thenReturn(user);
         Mockito.when(productService.findAll(user)).thenReturn(List.of(product1, product2));
-        Mockito.when(productMapper.toDtoByRole(product1, user.getRole())).thenReturn(dto1);
-        Mockito.when(productMapper.toDtoByRole(product2, user.getRole())).thenReturn(dto2);
+        Mockito.when(productMapper.toDto(product1, user.getRole())).thenReturn(dto1);
+        Mockito.when(productMapper.toDto(product2, user.getRole())).thenReturn(dto2);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(dto1.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(dto1.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(dto1.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].category").value(dto1.getCategory()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].supplierCost").value(dto1.getSupplierCost()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(dto2.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(dto2.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].description").value(dto2.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].category").value(dto2.getCategory()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].supplierCost").value(dto2.getSupplierCost()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(dto1.id()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(dto1.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(dto1.description()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].category").value(dto1.category()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].cost").value(dto1.cost()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(dto2.id()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(dto2.name()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].description").value(dto2.description()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].category").value(dto2.category()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].cost").value(dto2.cost()));
 
         Mockito.verify(productService, Mockito.times(1)).findAll(user);
     }
@@ -167,7 +169,7 @@ class ProductControllerTest {
         product.setBuyer(buyerUser);
         Mockito.when(productService.findById(product.getId(), buyerUser)).thenReturn(product);
 
-        ProductBuyerDTO productBuyerDTO = new ProductBuyerDTO(
+        ViewProductDTO productBuyerDTO = new ViewProductDTO(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
@@ -175,24 +177,26 @@ class ProductControllerTest {
                 product.getSupplierCost()
         );
 
-        Mockito.when(productMapper.toDtoByRole(product, buyerUser.getRole())).thenReturn(productBuyerDTO);
+        Mockito.when(productMapper.toDto(product, buyerUser.getRole())).thenReturn(productBuyerDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/products/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id")
+                        .value(productBuyerDTO.id()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name")
-                        .value(productBuyerDTO.getName()))
+                        .value(productBuyerDTO.name()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.description")
-                        .value(productBuyerDTO.getDescription()))
+                        .value(productBuyerDTO.description()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.category")
-                        .value(productBuyerDTO.getCategory()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.finalCost")
-                        .value(productBuyerDTO.getFinalCost()));
+                        .value(productBuyerDTO.category()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.cost")
+                        .value(productBuyerDTO.cost()));
 
         Mockito.verify(authService, Mockito.times(1)).getAuthenticatedUser();
         Mockito.verify(productService, Mockito.times(1))
                 .findById(product.getId(), buyerUser);
         Mockito.verify(productMapper, Mockito.times(1))
-                .toDtoByRole(product, buyerUser.getRole());
+                .toDto(product, buyerUser.getRole());
     }
 
     /**
@@ -269,7 +273,7 @@ class ProductControllerTest {
 
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, sellerUser))
                 .thenReturn(product);
         Mockito.when(productService.save(product))
                 .thenReturn(product);
@@ -298,7 +302,7 @@ class ProductControllerTest {
         updateDTO.setSellerCost(1000);
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(buyerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, buyerUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
@@ -322,12 +326,14 @@ class ProductControllerTest {
         updateDTO.setDescription("description");
         updateDTO.setSellerCost(1000);
 
+        product.setSeller(sellerUser);
+
         User anotherSeller = new User();
         anotherSeller.setRole(Role.SELLER);
 
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(anotherSeller);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, anotherSeller))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/seller")
@@ -355,7 +361,7 @@ class ProductControllerTest {
 
         Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
         product.setSupplier(supplierUser);
-        Mockito.when(productService.findById(1L)).thenReturn(product);
+        Mockito.when(productService.findById(1L, supplierUser)).thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -412,7 +418,7 @@ class ProductControllerTest {
 
         Mockito.when(authService.getAuthenticatedUser()).thenReturn(supplierUser);
         product.setSupplier(otherSupplier);
-        Mockito.when(productService.findById(1L)).thenReturn(product);
+        Mockito.when(productService.findById(1L, supplierUser)).thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -441,7 +447,7 @@ class ProductControllerTest {
 
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(supplierUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/products/1/supplier")
@@ -465,7 +471,7 @@ class ProductControllerTest {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(supplierUser);
 
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/products/1"))
@@ -491,7 +497,7 @@ class ProductControllerTest {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(supplierUser);
 
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/products/1"))
@@ -511,7 +517,7 @@ class ProductControllerTest {
     void testDeleteByNotSupplier() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(sellerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, sellerUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/products/1"))
@@ -659,7 +665,7 @@ class ProductControllerTest {
                 .thenReturn(supplierUser);
         Mockito.when(userService.getUserById(2L))
                 .thenReturn(sellerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
@@ -687,7 +693,7 @@ class ProductControllerTest {
                 .thenReturn(supplierUser);
         Mockito.when(userService.getUserById(2L))
                 .thenReturn(sellerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
@@ -711,7 +717,7 @@ class ProductControllerTest {
                 .thenReturn(sellerUser);
         Mockito.when(userService.getUserById(2L))
                 .thenReturn(supplierUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, sellerUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
@@ -723,6 +729,36 @@ class ProductControllerTest {
         Mockito.verify(productService, Mockito.never())
                 .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
     }
+
+    /**
+     * <b>Проверяет назначение продавца пользователю без роли SELLER через контроллер</b>
+     * <p>Ожидается - код 403 и исключение UserNotSuitableRoleException с сообщением:
+     * "Продавцом можно назначить только пользователя с ролью SELLER"</p>
+     */
+    @Test
+    void testAssignSellerWrongRole() throws Exception {
+
+        AssignSellerDTO assignSellerDTO = new AssignSellerDTO(buyerUser.getId());
+        product.setSupplier(supplierUser);
+
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(supplierUser);
+        Mockito.when(userService.getUserById(buyerUser.getId()))
+                .thenReturn(buyerUser);
+        Mockito.when(productService.findById(product.getId(), supplierUser))
+                .thenReturn(product);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/assign-seller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(assignSellerDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Продавцом можно назначить только пользователя с ролью SELLER"));
+
+        Mockito.verify(productService, Mockito.never())
+                .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
+    }
+
 
     /**
      * <b>Проверяет назначение несуществующего продавца на товар</b>
@@ -740,7 +776,7 @@ class ProductControllerTest {
                 .when(userService)
                 .getUserById(nonExistingUserId);
 
-        Mockito.when(productService.findById(productId))
+        Mockito.when(productService.findById(productId, supplierUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/assign-seller", productId)
@@ -771,7 +807,7 @@ class ProductControllerTest {
                 .thenReturn(sellerUser);
         Mockito.doThrow(new ProductNotFoundException(productId))
                 .when(productService)
-                .findById(productId);
+                .findById(productId, supplierUser);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/{id}/assign-seller", productId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -781,7 +817,7 @@ class ProductControllerTest {
                         .value("Товар с id = 1 не найден"));
 
         Mockito.verify(productService)
-                .findById(productId);
+                .findById(productId, supplierUser);
         Mockito.verify(productService, Mockito.never())
                 .assignSeller(Mockito.any(Product.class), Mockito.any(User.class));
     }
@@ -794,7 +830,7 @@ class ProductControllerTest {
     void testBuyByBuyer() throws Exception {
         Mockito.when(authService.getAuthenticatedUser())
                 .thenReturn(buyerUser);
-        Mockito.when(productService.findById(1L))
+        Mockito.when(productService.findById(1L, buyerUser))
                 .thenReturn(product);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/buy"))
