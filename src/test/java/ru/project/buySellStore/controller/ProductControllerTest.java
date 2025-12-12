@@ -535,10 +535,6 @@ class ProductControllerTest {
      */
     @Test
     void testArchive() throws Exception {
-        Mockito.doNothing()
-                .when(productService)
-                .archive(1L);
-
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/archive"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Товар добавлен в архив"));
@@ -595,10 +591,6 @@ class ProductControllerTest {
      */
     @Test
     void testRestore() throws Exception {
-        Mockito.doNothing()
-                .when(productService)
-                .restore(1L);
-
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products/1/restore"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(
