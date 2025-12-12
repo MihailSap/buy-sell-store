@@ -4,6 +4,7 @@ package ru.project.buySellStore.dto;
  * DTO для передачи данных отчета о доходах или расходах
  */
 public class ReportDTO {
+
     private String category;
 
     private String period;

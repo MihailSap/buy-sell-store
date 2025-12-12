@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.project.buySellStore.dto.ReportDTO;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.ProductService;
 import ru.project.buySellStore.service.impl.ExpenseService;
+import ru.project.buySellStore.service.impl.PeriodService;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class ExpenseController {
 
     private final AuthService authServiceImpl;
 
+    private final PeriodService periodService;
+
     /**
      * Создание контроллера для просмотра расходов с внедрением нужных зависимостей
      */
@@ -34,10 +38,11 @@ public class ExpenseController {
     public ExpenseController(
             ProductService productService,
             ExpenseService expenseService,
-            AuthService authServiceImpl) {
+            AuthService authServiceImpl, PeriodService periodService) {
         this.productService = productService;
         this.expenseService = expenseService;
         this.authServiceImpl = authServiceImpl;
+        this.periodService = periodService;
     }
 
     /**
@@ -45,11 +50,13 @@ public class ExpenseController {
      */
     @PostMapping
     public String getExpense(@RequestBody ReportDTO reportDTO){
-        User buyer = authServiceImpl.getAuthenticatedUser();
-        List<Product> products = productService.findByCategoryAndBuyer(reportDTO.getCategory(), buyer);
-        int expenseSum = expenseService.getExpense(products);
-        return String.format(
-                "За все время вы потратили %d₽ на товары в категории %s",
-                expenseSum, reportDTO.getCategory());
+        User user = authServiceImpl.getAuthenticatedUser();
+        List<Product> products = productService.
+                findByBuyerAndCategoryAndBoughtDateBetween(
+                        reportDTO.getCategory(), user, reportDTO.getPeriod());
+        int income = expenseService.getExpense(products);
+        String period = periodService.getPeriod(reportDTO.getPeriod());
+        return String.format("%s вы потратили %s на товарах в категории %s",
+                period, income, reportDTO.getCategory());
     }
 }

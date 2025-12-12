@@ -27,26 +27,36 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     /**
      * Получить товары по продавцу и временному промежутку
      */
-    List<Product> findBySellerAndBoughtDateBetween(User seller, LocalDate startDate, LocalDate endDate);
+    List<Product> findBySellerAndBoughtDateBetween(
+            User seller, LocalDate startDate, LocalDate endDate);
 
     /**
      * Получить товары по продавцу, категории и временному промежутку
      */
-    List<Product> findBySellerAndCategoryAndBoughtDateBetween(User seller,
-                                                              String category,
-                                                              LocalDate startDate,
-                                                              LocalDate endDate);
+    List<Product> findBySellerAndCategoryAndBoughtDateBetween(
+            User seller, String category, LocalDate startDate, LocalDate endDate);
 
     /**
      * Получить товары по поставщику и временному промежутку
      */
-    List<Product> findBySupplierAndBoughtDateBetween(User supplier, LocalDate startDate, LocalDate endDate);
+    List<Product> findBySupplierAndBoughtDateBetween(
+            User supplier, LocalDate startDate, LocalDate endDate);
 
     /**
      * Получить товары по поставщику, категории и временному промежутку
      */
-    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(User supplier,
-                                                                String category,
-                                                                LocalDate startDate,
-                                                                LocalDate endDate);
+    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
+            User supplier, String category, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Получить товары по покупателю и временному промежутку
+     */
+    List<Product> findByBuyerAndBoughtDateBetween(
+            User buyer, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Получить товары по покупателю, категории и временному промежутку
+     */
+    List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
+            User supplier, String category, LocalDate startDate, LocalDate endDate);
 }

@@ -65,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
+    @Override
     public void delete(Long id) throws ProductNotFoundException {
         try{
             Product product = findById(id);
@@ -142,8 +143,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findBySellerAndCategoryAndBoughtDateBetween(String category,
-                                                                    User seller, String period) {
+    public List<Product> findBySellerAndCategoryAndBoughtDateBetween(
+            String category, User seller, String period) {
         LocalDate[] range = getDateRange(period);
         LocalDate startDate = range[0];
         LocalDate endDate = range[1];
@@ -151,14 +152,14 @@ public class ProductServiceImpl implements ProductService {
         if (category.equals("ALL")) {
             return productRepository.findBySellerAndBoughtDateBetween(seller, startDate, endDate);
         }
-        return productRepository.findBySellerAndCategoryAndBoughtDateBetween(seller,
-                category, startDate, endDate);
+        return productRepository.findBySellerAndCategoryAndBoughtDateBetween(
+                seller, category, startDate, endDate);
     }
 
 
     @Override
-    public List<Product> findBySupplierAndCategoryAndBoughtDateBetween(String category,
-                                                                     User supplier, String period) {
+    public List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
+            String category, User supplier, String period) {
         LocalDate[] range = getDateRange(period);
         LocalDate startDate = range[0];
         LocalDate endDate = range[1];
@@ -166,8 +167,22 @@ public class ProductServiceImpl implements ProductService {
         if (category.equals("ALL")) {
             return productRepository.findBySupplierAndBoughtDateBetween(supplier, startDate, endDate);
         }
-        return productRepository.findBySupplierAndCategoryAndBoughtDateBetween(supplier,
-                category, startDate, endDate);
+        return productRepository.findBySupplierAndCategoryAndBoughtDateBetween(
+                supplier, category, startDate, endDate);
+    }
+
+    @Override
+    public List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
+            String category, User buyer, String period){
+        LocalDate[] range = getDateRange(period);
+        LocalDate startDate = range[0];
+        LocalDate endDate = range[1];
+
+        if (category.equals("ALL")) {
+            return productRepository.findByBuyerAndBoughtDateBetween(buyer, startDate, endDate);
+        }
+        return productRepository.findByBuyerAndCategoryAndBoughtDateBetween(
+                buyer, category, startDate, endDate);
     }
 
     /**
@@ -179,7 +194,7 @@ public class ProductServiceImpl implements ProductService {
             case "TODAY" -> endDate;
             case "LAST_WEEK" -> endDate.minusWeeks(1);
             case "LAST_MONTH" -> endDate.minusMonths(1);
-            case "ALL" -> LocalDate.MIN;
+            case "ALL" -> LocalDate.of(1970, 1, 1);
             default -> throw new IllegalArgumentException("Неправильный формат периода: " + period);
         };
 

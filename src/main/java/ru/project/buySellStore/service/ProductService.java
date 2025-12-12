@@ -77,14 +77,17 @@ public interface ProductService {
      * Получить товары по продавцу, категории и временному промежутку
      * <p>Если категория равна ALL - findBySellerAndBoughtDateBetween
      */
-    List<Product> findBySellerAndCategoryAndBoughtDateBetween(String category,
-                                                             User seller, String period);
+    List<Product> findBySellerAndCategoryAndBoughtDateBetween(
+            String category, User seller, String period);
 
     /**
      * Получить товары по поставщику, категории и временному промежутку
      *
      * <p>Если категория равна ALL - findBySellerAndBoughtDateBetween
      */
-    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(String category,
-                                                                User supplier, String period);
+    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
+            String category, User supplier, String period);
+
+    List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
+            String category, User buyer, String period);
 }
