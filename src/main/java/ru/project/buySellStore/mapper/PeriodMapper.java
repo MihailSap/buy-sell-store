@@ -12,6 +12,9 @@ import java.time.LocalDate;
 @Component
 public class PeriodMapper {
 
+    /**
+     * Преобразование периода в его описание
+     */
     public String getPeriodDescription(Period period){
         return switch (period) {
             case Period.TODAY -> "За сегодня";
@@ -21,6 +24,9 @@ public class PeriodMapper {
         };
     }
 
+    /**
+     * Преобразование периода в диапазон дат
+     */
     public DateRange mapPeriodToDateRange(Period period) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = switch (period) {
