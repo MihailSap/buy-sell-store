@@ -6,6 +6,7 @@ import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.model.DateRange;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
@@ -143,10 +144,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findBySellerAndCategoryAndBoughtDateBetween(
-            String category, User seller, String period) {
-        LocalDate[] range = getDateRange(period);
-        LocalDate startDate = range[0];
-        LocalDate endDate = range[1];
+            String category, User seller, DateRange dateRange) {
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
 
         if (category.equals("ALL")) {
             return productRepository.findBySellerAndBoughtDateBetween(seller, startDate, endDate);
@@ -155,13 +155,11 @@ public class ProductServiceImpl implements ProductService {
                 seller, category, startDate, endDate);
     }
 
-
     @Override
     public List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
-            String category, User supplier, String period) {
-        LocalDate[] range = getDateRange(period);
-        LocalDate startDate = range[0];
-        LocalDate endDate = range[1];
+            String category, User supplier, DateRange dateRange) {
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
 
         if (category.equals("ALL")) {
             return productRepository.findBySupplierAndBoughtDateBetween(supplier, startDate, endDate);
@@ -172,32 +170,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
-            String category, User buyer, String period){
-        LocalDate[] range = getDateRange(period);
-        LocalDate startDate = range[0];
-        LocalDate endDate = range[1];
+            String category, User buyer, DateRange dateRange){
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
 
         if (category.equals("ALL")) {
             return productRepository.findByBuyerAndBoughtDateBetween(buyer, startDate, endDate);
         }
         return productRepository.findByBuyerAndCategoryAndBoughtDateBetween(
                 buyer, category, startDate, endDate);
-    }
-
-    /**
-     * Получить период - первый и последний день
-     */
-    private LocalDate[] getDateRange(String period) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = switch (period) {
-            case "TODAY" -> endDate;
-            case "LAST_WEEK" -> endDate.minusWeeks(1);
-            case "LAST_MONTH" -> endDate.minusMonths(1);
-            case "ALL" -> LocalDate.of(1970, 1, 1);
-            default -> throw new IllegalArgumentException("Неправильный формат периода: " + period);
-        };
-
-        return new LocalDate[]{startDate, endDate};
     }
 
     /**

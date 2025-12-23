@@ -10,7 +10,6 @@ import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.IncomeService;
 import ru.project.buySellStore.service.PeriodService;
 import ru.project.buySellStore.service.ProductService;
-import ru.project.buySellStore.service.impl.PeriodServiceImpl;
 
 import java.util.List;
 
@@ -26,6 +25,7 @@ public class IncomeController {
     private final AuthService authService;
 
     private final ProductService productService;
+
     private final PeriodService periodService;
 
     /**
@@ -34,7 +34,11 @@ public class IncomeController {
      */
     @Autowired
     public IncomeController(
-            IncomeService incomeService, AuthService authService, ProductService productService, PeriodServiceImpl periodService) {
+            IncomeService incomeService,
+            AuthService authService,
+            ProductService productService,
+            PeriodService periodService
+    ) {
         this.incomeService = incomeService;
         this.authService = authService;
         this.productService = productService;
@@ -51,18 +55,18 @@ public class IncomeController {
         if(user.getRole() == Role.SELLER) {
             List<Product> products = productService.
                     findBySellerAndCategoryAndBoughtDateBetween(
-                            reportDTO.getCategory(), user, reportDTO.getPeriod());
+                            reportDTO.getCategory(), user, periodService.getDateRange(reportDTO.getPeriod()));
             income = incomeService.calculateIncomeSeller(products);
         }
 
         if (user.getRole() == Role.SUPPLIER) {
             List<Product> products = productService.
                     findBySupplierAndCategoryAndBoughtDateBetween(
-                            reportDTO.getCategory(), user, reportDTO.getPeriod());
+                            reportDTO.getCategory(), user, periodService.getDateRange(reportDTO.getPeriod()));
             income = incomeService.calculateIncomeSupplier(products);
         }
 
-        String period = periodService.getPeriod(reportDTO.getPeriod());
+        String period = periodService.getPeriodDescription(reportDTO.getPeriod());
         return String.format("%s вы заработали %s на товарах в категории %s",
                 period, income, reportDTO.getCategory());
     }

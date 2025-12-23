@@ -37,7 +37,9 @@ public class ExpenseController {
     public ExpenseController(
             ProductService productService,
             ExpenseService expenseService,
-            AuthService authServiceImpl, PeriodService periodService) {
+            AuthService authServiceImpl,
+            PeriodService periodService
+    ) {
         this.productService = productService;
         this.expenseService = expenseService;
         this.authServiceImpl = authServiceImpl;
@@ -52,9 +54,10 @@ public class ExpenseController {
         User user = authServiceImpl.getAuthenticatedUser();
         List<Product> products = productService.
                 findByBuyerAndCategoryAndBoughtDateBetween(
-                        reportDTO.getCategory(), user, reportDTO.getPeriod());
+                        reportDTO.getCategory(), user, periodService.getDateRange(reportDTO.getPeriod())
+                );
         int income = expenseService.getExpense(products);
-        String period = periodService.getPeriod(reportDTO.getPeriod());
+        String period = periodService.getPeriodDescription(reportDTO.getPeriod());
         return String.format("%s вы потратили %s на товарах в категории %s",
                 period, income, reportDTO.getCategory());
     }
