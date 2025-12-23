@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.project.buySellStore.dto.ReportDTO;
 import ru.project.buySellStore.model.Product;
-import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
+import ru.project.buySellStore.service.ExpenseService;
+import ru.project.buySellStore.service.PeriodService;
 import ru.project.buySellStore.service.ProductService;
-import ru.project.buySellStore.service.impl.ExpenseService;
-import ru.project.buySellStore.service.impl.PeriodService;
 
 import java.util.List;
 

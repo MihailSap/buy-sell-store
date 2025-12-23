@@ -8,6 +8,9 @@ import ru.project.buySellStore.service.IncomeService;
 
 import java.util.List;
 
+/**
+ * Cервис для расчета дохода
+ */
 @Service
 public class IncomeServiceImpl implements IncomeService {
 
@@ -15,19 +18,17 @@ public class IncomeServiceImpl implements IncomeService {
     public int calculateIncomeSeller(List<Product> products) {
         int income = 0;
         for (Product product : products) {
-            if (product.getBuyer() != null) {
                 int difference = product.getSellerCost() - product.getSupplierCost();
                 income += difference;
-            }
         }
+
         return income;
     }
 
     @Override
     public int calculateIncomeSupplier(List<Product> products) {
         int income = 0;
-        for (Product product : products) {
-            if (product.getBuyer() != null) {
+        for (Product product : products) {{
                 income += product.getSupplierCost();
             }
         }

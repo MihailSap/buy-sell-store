@@ -4,6 +4,9 @@ import ru.project.buySellStore.model.Product;
 
 import java.util.List;
 
+/**
+ * Интерфейс для расчета дохода
+ */
 public interface IncomeService {
 
     /**

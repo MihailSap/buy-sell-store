@@ -8,8 +8,9 @@ import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.IncomeService;
+import ru.project.buySellStore.service.PeriodService;
 import ru.project.buySellStore.service.ProductService;
-import ru.project.buySellStore.service.impl.PeriodService;
+import ru.project.buySellStore.service.impl.PeriodServiceImpl;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class IncomeController {
      */
     @Autowired
     public IncomeController(
-            IncomeService incomeService, AuthService authService, ProductService productService, PeriodService periodService) {
+            IncomeService incomeService, AuthService authService, ProductService productService, PeriodServiceImpl periodService) {
         this.incomeService = incomeService;
         this.authService = authService;
         this.productService = productService;
