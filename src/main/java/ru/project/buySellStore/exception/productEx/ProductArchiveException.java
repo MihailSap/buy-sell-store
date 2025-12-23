@@ -8,6 +8,6 @@ import ru.project.buySellStore.exception.globalEx.BuySellStoreConflictException;
 public class ProductArchiveException extends BuySellStoreConflictException {
 
     public ProductArchiveException(Long id) {
-        super("Товар с id = " + id + " находится уже в архиве");
+        super("Товар с id = " + id + " уже находится в архиве");
     }
 }

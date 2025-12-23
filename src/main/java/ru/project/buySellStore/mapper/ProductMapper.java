@@ -1,8 +1,9 @@
 package ru.project.buySellStore.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.project.buySellStore.dto.ProductDTO;
+import ru.project.buySellStore.dto.ViewProductDTO;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.Role;
 
 /**
  * Маппер для преобразования между Product товара и сущностью
@@ -11,15 +12,19 @@ import ru.project.buySellStore.model.Product;
 public class ProductMapper {
 
     /**
-     * Преобразование товара из сущности в DTO
+     * Преобразование товара в DTO для конкретной роли пользователя
      */
-    public ProductDTO toDto(Product product) {
-        return new ProductDTO(
+    public ViewProductDTO toDto(Product product, Role role) {
+
+        return new ViewProductDTO(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getCategory(),
-                product.getCost()
+                switch (role) {
+                    case SUPPLIER -> product.getSupplierCost();
+                    case SELLER, BUYER -> product.getSellerCost();
+                }
         );
     }
 }

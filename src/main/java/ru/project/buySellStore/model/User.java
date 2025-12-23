@@ -3,6 +3,8 @@ package ru.project.buySellStore.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <b>Сущность пользователя</b>
@@ -54,6 +56,27 @@ public class User extends BaseEntity{
      */
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    /**
+     * <b>Товары поставщика</b>
+     * <p>Список товаров, которые поставщик создал</p>
+     */
+    @OneToMany(mappedBy = "supplier")
+    private Set<Product> suppliedProducts = new HashSet<>();
+
+    /**
+     * <b>Товары продавца</b>
+     * <p>Список товаров, которые продавец продает</p>
+     */
+    @OneToMany(mappedBy = "seller")
+    private Set<Product> sellingProducts = new HashSet<>();
+
+    /**
+     * <b>Товары покупателя</b>
+     * <p>Список товаров, которые покупатель купил</p>
+     */
+    @OneToMany(mappedBy = "buyer")
+    private Set<Product> boughtProducts = new HashSet<>();
 
     /**
      * Конструктор

@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: vyacheslav_dzhabarov
+      changes:
+        - addColumn:
+            tableName: product
+            columns:
+              - column:
+                  name: seller_cost
+                  type: INT
+                  constraints:
+                    nullable: true

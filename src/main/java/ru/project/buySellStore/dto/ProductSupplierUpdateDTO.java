@@ -3,10 +3,13 @@ package ru.project.buySellStore.dto;
 import jakarta.validation.constraints.*;
 
 /**
- * DTO для обновления товара
+ *  DTO для обновления товара Поставщику
  */
-public class ProductUpdateDTO {
+public class ProductSupplierUpdateDTO {
 
+    /**
+     * Название
+     */
     @NotBlank(message = "Название не может быть пустым")
     @Size(max = 30, message = "Название не должно превышать 30 символов")
     @Pattern(
@@ -15,12 +18,18 @@ public class ProductUpdateDTO {
     )
     private String name;
 
+    /**
+     * Описание
+     */
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
 
+    /**
+     * Цена поставщика
+     */
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
-    private Integer cost;
+    private Integer supplierCost;
 
     /**
      * Получить имя
@@ -53,14 +62,14 @@ public class ProductUpdateDTO {
     /**
      * Получить стоимость
      */
-    public Integer getCost() {
-        return cost;
+    public Integer getSupplierCost() {
+        return supplierCost;
     }
 
     /**
      * Установить стоимость
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setSupplierCost(Integer supplierCost) {
+        this.supplierCost = supplierCost;
     }
 }
