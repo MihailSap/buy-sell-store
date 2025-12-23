@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.project.buySellStore.dto.ReportDTO;
+import ru.project.buySellStore.mapper.PeriodMapper;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.ExpenseService;
-import ru.project.buySellStore.service.PeriodService;
 import ru.project.buySellStore.service.ProductService;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class ExpenseController {
 
     private final AuthService authServiceImpl;
 
-    private final PeriodService periodService;
+    private final PeriodMapper periodMapper;
 
     /**
      * Создание контроллера для просмотра расходов с внедрением нужных зависимостей
@@ -38,12 +38,12 @@ public class ExpenseController {
             ProductService productService,
             ExpenseService expenseService,
             AuthService authServiceImpl,
-            PeriodService periodService
+            PeriodMapper periodMapper
     ) {
         this.productService = productService;
         this.expenseService = expenseService;
         this.authServiceImpl = authServiceImpl;
-        this.periodService = periodService;
+        this.periodMapper = periodMapper;
     }
 
     /**
@@ -54,10 +54,10 @@ public class ExpenseController {
         User user = authServiceImpl.getAuthenticatedUser();
         List<Product> products = productService.
                 findByBuyerAndCategoryAndBoughtDateBetween(
-                        reportDTO.getCategory(), user, periodService.getDateRange(reportDTO.getPeriod())
+                        reportDTO.getCategory(), user, periodMapper.mapPeriodToDateRange(reportDTO.getPeriod())
                 );
         int income = expenseService.getExpense(products);
-        String period = periodService.getPeriodDescription(reportDTO.getPeriod());
+        String period = periodMapper.getPeriodDescription(reportDTO.getPeriod());
         return String.format("%s вы потратили %s на товарах в категории %s",
                 period, income, reportDTO.getCategory());
     }
