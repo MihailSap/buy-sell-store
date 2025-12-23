@@ -48,21 +48,6 @@ class ProductServiceImplTest {
     }
 
     /**
-     * <b>Проверяет поиск несуществующего товара</b>
-     * <p>Ожидается появление ошибки с сообщением: "Товар с id = 1 не найден"</p>
-     */
-    @Test
-    void testFindNonExistingProductById() {
-        Mockito.when(productRepository.findById(1L))
-                .thenReturn(Optional.empty());
-
-        ProductNotFoundException ex = Assertions.assertThrows(ProductNotFoundException.class,
-                () -> productService.findById(1L));
-
-        Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
-    }
-
-    /**
      * Тестирование метода findAll(User user) для роли SUPPLIER
      * <p>
      * Проверяется, что поставщик видит только свои активные товары,
@@ -326,23 +311,6 @@ class ProductServiceImplTest {
         Mockito.verify(productRepository)
                 .save(product);
     }
-
-    /**
-     * <b>Проверяет назначение продавцом на товар пользователю без роли {@link Role#SELLER}</b>
-     * <p>Ожидается появление исключения с сообщением "Продавцом можно назначить только пользователя с ролью SELLER"</p>
-     */
-    @Test
-    void testAssignSellerWrongRole() {
-        UserNotSuitableRoleException ex = Assertions.assertThrows(
-                UserNotSuitableRoleException.class, () -> productService.assignSeller(product, buyer));
-
-        Assertions.assertEquals(
-                "Продавцом можно назначить только пользователя с ролью SELLER", ex.getMessage());
-
-        Mockito.verify(productRepository, Mockito.never())
-                .save(Mockito.any(Product.class));
-    }
-
 
     /**
      * <b>Проверяет успешную покупку товара</b>

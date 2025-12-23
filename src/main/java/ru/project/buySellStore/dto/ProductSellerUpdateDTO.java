@@ -7,9 +7,15 @@ import jakarta.validation.constraints.*;
  */
 public class ProductSellerUpdateDTO {
 
+    /**
+     * Новое Описание
+     */
     @NotBlank(message = "Описание не может быть пустым")
     private String description;
 
+    /**
+     * Цена продавца
+     */
     @NotNull(message = "Стоимость обязательна")
     @Positive(message = "Стоимость должна быть больше нуля")
     private Integer sellerCost;
