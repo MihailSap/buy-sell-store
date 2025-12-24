@@ -25,9 +25,10 @@ class ExpenseServiceImplTest {
 
     /**
      * Тестирование расчета расхода у покупателя от трех покупок
+     * <p>Ожидается, что расход будет верно посчитан: 1000 + 2500 + 500 = 4000</p>
      */
     @Test
-    void testGetExpense_BoughtProducts() {
+    void testGetExpenseWithBoughtProducts() {
         Product product1 = new Product();
         product1.setSellerCost(1000);
 
@@ -46,10 +47,10 @@ class ExpenseServiceImplTest {
 
     /**
      * Тестирование расчета расхода у покупателя без купленных продуктов
-     * Если список товаров пуст — расход 0
+     * <p>Если список товаров пуст — расход 0</p>
      */
     @Test
-    void getExpense_emptyProducts() {
+    void getExpenseWithEmptyProducts() {
         int expense = expenseService.getExpense(List.of());
         Assertions.assertEquals(0, expense);
     }

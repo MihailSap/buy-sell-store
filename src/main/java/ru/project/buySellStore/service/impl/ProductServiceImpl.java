@@ -14,7 +14,6 @@ import ru.project.buySellStore.service.ProductService;
 
 import java.time.LocalDate;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -132,14 +131,6 @@ public class ProductServiceImpl implements ProductService {
         product.setBoughtDate(LocalDate.now());
 
         productRepository.save(product);
-    }
-
-    @Override
-    public List<Product> findByCategoryAndBuyer(String category, User buyer){
-        if(category.equals("ALL")){
-            return productRepository.findByBuyer(buyer);
-        }
-        return productRepository.findByCategoryAndBuyer(category, buyer);
     }
 
     @Override

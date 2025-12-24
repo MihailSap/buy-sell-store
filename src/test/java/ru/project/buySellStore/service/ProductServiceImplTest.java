@@ -10,12 +10,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
+import ru.project.buySellStore.model.DateRange;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.impl.ProductServiceImpl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,8 @@ class ProductServiceImplTest {
     private ProductServiceImpl productService;
 
     private User buyer;
+    private User seller;
+    private User supplier;
 
     private Product product;
 
@@ -41,7 +45,16 @@ class ProductServiceImplTest {
     @BeforeEach
     void setUp(){
         buyer = new User();
+        buyer.setId(1L);
         buyer.setRole(Role.BUYER);
+
+        seller = new User();
+        seller.setId(2L);
+        seller.setRole(Role.SELLER);
+
+        supplier = new User();
+        supplier.setId(3L);
+        supplier.setRole(Role.SUPPLIER);
 
         product = new Product();
         product.setId(1L);
@@ -449,5 +462,131 @@ class ProductServiceImplTest {
         );
 
         Assertions.assertEquals("Товар с id = 1 не найден", ex.getMessage());
+    }
+
+    /**
+     * Проверяет поиск товаров по продавцу и категории ALL
+     * <p>Ожидается, что метод вернет все товары указанного продавца за указанный период</p>
+     */
+    @Test
+    void testFindBySellerWithAllCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findBySellerAndBoughtDateBetween(seller, start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findBySellerAndCategoryAndBoughtDateBetween(
+                "ALL", seller, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findBySellerAndBoughtDateBetween(seller, start, end);
+    }
+
+    /**
+     * Проверяет поиск товаров по продавцу и конкретной категории
+     * <p>Ожидается, что метод вернет только товары указанного продавца в указанной категории за период</p>
+     */
+    @Test
+    void testFindBySellerWithSpecificCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findBySellerAndCategoryAndBoughtDateBetween(
+                seller,"Electronics", start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findBySellerAndCategoryAndBoughtDateBetween(
+                "Electronics", seller, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findBySellerAndCategoryAndBoughtDateBetween(
+                seller, "Electronics", start, end);
+    }
+
+    /**
+     * Проверяет поиск товаров по поставщику и категории ALL
+     * <p>Ожидается, что метод вернет все товары указанного поставщика за указанный период</p>
+     */
+    @Test
+    void testFindBySupplierWithAllCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findBySupplierAndBoughtDateBetween(supplier, start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findBySupplierAndCategoryAndBoughtDateBetween(
+                "ALL", supplier, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findBySupplierAndBoughtDateBetween(supplier, start, end);
+    }
+
+    /**
+     * Проверяет поиск товаров по поставщику и конкретной категории
+     * <p>Ожидается, что метод вернет только товары указанного поставщика в указанной категории за период</p>
+     */
+    @Test
+    void testFindBySupplierWithSpecificCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findBySupplierAndCategoryAndBoughtDateBetween(
+                supplier, "Electronics", start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findBySupplierAndCategoryAndBoughtDateBetween(
+                "Electronics", supplier, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findBySupplierAndCategoryAndBoughtDateBetween(
+                supplier, "Electronics", start, end);
+    }
+
+    /**
+     * Проверяет поиск товаров по покупателю и категории ALL
+     * <p>Ожидается, что метод вернет все товары указанного покупателя за указанный период</p>
+     */
+    @Test
+    void testFindByBuyerWithAllCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findByBuyerAndBoughtDateBetween(buyer, start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findByBuyerAndCategoryAndBoughtDateBetween(
+                "ALL", buyer, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findByBuyerAndBoughtDateBetween(buyer, start, end);
+    }
+
+    /**
+     * Проверяет поиск товаров по покупателю и конкретной категории
+     * <p>Ожидается, что метод вернет только товары указанного покупателя в указанной категории за период</p>
+     */
+    @Test
+    void testFindByBuyerWithSpecificCategory() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 12, 31);
+
+        List<Product> products = List.of(product);
+        Mockito.when(productRepository.findByBuyerAndCategoryAndBoughtDateBetween(
+                buyer, "Electronics", start, end))
+                .thenReturn(products);
+
+        List<Product> result = productService.findByBuyerAndCategoryAndBoughtDateBetween(
+                "Electronics", buyer, new DateRange(start, end));
+
+        Assertions.assertEquals(products, result);
+        Mockito.verify(productRepository).findByBuyerAndCategoryAndBoughtDateBetween(
+                buyer, "Electronics", start, end);
     }
 }
