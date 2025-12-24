@@ -1,6 +1,7 @@
 package ru.project.buySellStore.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 import ru.project.buySellStore.dto.ReportDTO;
 import ru.project.buySellStore.mapper.PeriodMapper;
@@ -59,11 +60,15 @@ public class IncomeController {
             income = incomeService.calculateIncomeSeller(products);
         }
 
-        if (user.getRole() == Role.SUPPLIER) {
+        else if (user.getRole() == Role.SUPPLIER) {
             List<Product> products = productService.
                     findBySupplierAndCategoryAndBoughtDateBetween(
                             reportDTO.getCategory(), user, periodMapper.mapPeriodToDateRange(reportDTO.getPeriod()));
             income = incomeService.calculateIncomeSupplier(products);
+        }
+
+        else {
+            throw new AccessDeniedException("Только продавец или поставщик может узнать аналитику дохода!");
         }
 
         String period = periodMapper.getPeriodDescription(reportDTO.getPeriod());

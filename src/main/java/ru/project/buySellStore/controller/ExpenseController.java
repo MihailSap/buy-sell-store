@@ -1,6 +1,7 @@
 package ru.project.buySellStore.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.project.buySellStore.dto.ReportDTO;
 import ru.project.buySellStore.mapper.PeriodMapper;
 import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.Role;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.service.AuthService;
 import ru.project.buySellStore.service.ExpenseService;
@@ -52,9 +54,16 @@ public class ExpenseController {
     @PostMapping
     public String getExpense(@RequestBody ReportDTO reportDTO){
         User user = authServiceImpl.getAuthenticatedUser();
+
+        if (!user.getRole().equals(Role.BUYER)) {
+            throw new AccessDeniedException("Только покупатель может узнать аналитику расходов!");
+        }
+
         List<Product> products = productService.
                 findByBuyerAndCategoryAndBoughtDateBetween(
-                        reportDTO.getCategory(), user, periodMapper.mapPeriodToDateRange(reportDTO.getPeriod())
+                        reportDTO.getCategory(),
+                        user,
+                        periodMapper.mapPeriodToDateRange(reportDTO.getPeriod())
                 );
         int income = expenseService.getExpense(products);
         String period = periodMapper.getPeriodDescription(reportDTO.getPeriod());

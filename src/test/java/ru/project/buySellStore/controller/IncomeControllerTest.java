@@ -133,4 +133,31 @@ public class IncomeControllerTest {
                 .findBySellerAndCategoryAndBoughtDateBetween(
                         Mockito.any(String.class), Mockito.any(User.class), Mockito.any(DateRange.class));
     }
+
+    /**
+     * Проверка доступа для пользователя покупателя
+     * <p>Ожидается AccessDeniedException - "Только продавец или поставщик может узнать аналитику дохода!"</p>
+     */
+    @Test
+    void testGetIncomeBuyer() throws Exception {
+        User buyer = new User();
+        buyer.setRole(Role.BUYER);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(buyer);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/income")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reportDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Только продавец или поставщик может узнать аналитику дохода!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .findBySellerAndCategoryAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(productService, Mockito.never())
+                .findBySupplierAndCategoryAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(incomeService, Mockito.never())
+                .calculateIncomeSeller(Mockito.any());
+        Mockito.verify(incomeService, Mockito.never()).calculateIncomeSupplier(Mockito.any());
+    }
 }
