@@ -1,25 +1,29 @@
 package ru.project.buySellStore.dto;
 
+import ru.project.buySellStore.model.Period;
+
 /**
  * DTO для передачи данных отчета о доходах или расходах
  */
 public class ReportDTO {
 
+    /**
+     * Категория товаров
+     */
     private String category;
 
-    private String period;
+    private Period period;
 
     /**
      * Конструктор для создания DTO с указанными категорией и периодом
      */
-    public ReportDTO(String category, String period) {
+    public ReportDTO(String category, Period period) {
         this.category = category;
         this.period = period;
     }
 
     /**
      * Получить категорию
-     * @return
      */
     public String getCategory() {
         return category;
@@ -28,7 +32,7 @@ public class ReportDTO {
     /**
      * Получить период
      */
-    public String getPeriod() {
+    public Period getPeriod() {
         return period;
     }
 }

@@ -7,7 +7,7 @@ import ru.project.buySellStore.service.ExpenseService;
 import java.util.List;
 
 /**
- * Cервис для расчета расхода
+ * Сервис для расчета расхода
  */
 @Service
 public class ExpenseServiceImpl implements ExpenseService {

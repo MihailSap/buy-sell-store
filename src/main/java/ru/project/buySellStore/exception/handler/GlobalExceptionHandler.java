@@ -1,6 +1,5 @@
 package ru.project.buySellStore.exception.handler;
 
-import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,10 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.project.buySellStore.dto.ErrorDTO;
-import ru.project.buySellStore.exception.globalEx.BuySellStoreConflictException;
-import ru.project.buySellStore.exception.globalEx.BuySellStoreException;
-import ru.project.buySellStore.exception.globalEx.BuySellStoreNotFoundException;
-import ru.project.buySellStore.exception.globalEx.BuySellStoreNotSuitableRoleException;
+import ru.project.buySellStore.exception.globalEx.*;
 
 import java.util.stream.Collectors;
 
@@ -44,6 +40,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(ex.getMessage()));
     }
 
+    /**
+     * Обрабатывает ситуации, когда роль пользователя не подходит для выполнения действия
+     */
     @ExceptionHandler(BuySellStoreNotSuitableRoleException.class)
     public ResponseEntity<ErrorDTO> handleNotSuitableRoleEx(BuySellStoreNotSuitableRoleException ex) {
         logger.error("NotSuitableRoleException: {}", ex.getMessage(), ex);
@@ -72,7 +71,7 @@ public class GlobalExceptionHandler {
     /**
      * Обрабатывает ошибки валидации входных данных
      */
-    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDTO> handle(MethodArgumentNotValidException ex) {
         String description = "%s %s".formatted("Неправильно заполнены поля.",
                 ex.getBindingResult().getFieldErrors().stream().map((fe) -> {
