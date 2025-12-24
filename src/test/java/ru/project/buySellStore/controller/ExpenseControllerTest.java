@@ -97,4 +97,50 @@ public class ExpenseControllerTest {
         Mockito.verify(periodMapper)
                 .getPeriodDescription(Period.LAST_MONTH);
     }
+
+    /**
+     * Проверка доступа для пользователя продавца
+     * <p>Ожидается AccessDeniedException - "Только покупатель может узнать аналитику расходов!"</p>
+     */
+    @Test
+    void testGetExpenseSeller() throws Exception {
+        User seller = new User();
+        seller.setRole(Role.SELLER);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(seller);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/expense")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reportDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                .value("Только покупатель может узнать аналитику расходов!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .findByBuyerAndCategoryAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(expenseService, Mockito.never()).getExpense(Mockito.any());
+    }
+
+    /**
+     * Проверка доступа для пользователя поставщика
+     * <p>Ожидается AccessDeniedException - "Только покупатель может узнать аналитику расходов!"</p>
+     */
+    @Test
+    void testGetExpenseSupplier() throws Exception {
+        User seller = new User();
+        seller.setRole(Role.SUPPLIER);
+
+        Mockito.when(authService.getAuthenticatedUser()).thenReturn(seller);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/expense")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reportDTO)))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("Только покупатель может узнать аналитику расходов!"));
+
+        Mockito.verify(productService, Mockito.never())
+                .findByBuyerAndCategoryAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(expenseService, Mockito.never()).getExpense(Mockito.any());
+    }
 }
