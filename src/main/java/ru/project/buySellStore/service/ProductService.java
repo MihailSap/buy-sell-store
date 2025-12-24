@@ -33,11 +33,6 @@ public interface ProductService {
     Product findById(Long id, User user) throws ProductNotFoundException;
 
     /**
-     * Получить все товары по категории и покупателю
-     */
-    List<Product> findByCategoryAndBuyer(String category, User buyer);
-
-    /**
      * Удалить товар по id
      * @throws ProductNotFoundException если товара с указанным id не существует
      */

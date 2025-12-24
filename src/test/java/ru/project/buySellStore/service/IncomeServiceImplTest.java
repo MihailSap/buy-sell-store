@@ -25,9 +25,11 @@ class IncomeServiceImplTest {
 
     /**
      * Тестирование расчета дохода продавца от трех продуктов
+     * <p>Ожидается, что доход будет верно посчитан: (150 - 100) + (260 - 200) + (400 - 300) = 210</p>
+     *
      */
     @Test
-    void testCalculateIncomeSeller_BoughtProducts() {
+    void testCalculateIncomeSellerWithBoughtProducts() {
         Product soldProduct1 = new Product();
         soldProduct1.setSupplierCost(100);
         soldProduct1.setSellerCost(150);
@@ -49,19 +51,20 @@ class IncomeServiceImplTest {
 
     /**
      * Тестирование расчета дохода продавца без продуктов
-     * Доход - 0
+     * <p>Доход - 0</p>
      */
     @Test
-    void testCalculateIncomeSeller_emptyProducts() {
+    void testCalculateIncomeSellerWithEmptyProducts() {
         int income = incomeService.calculateIncomeSeller(List.of());
         Assertions.assertEquals(0, income);
     }
 
     /**
      * Тестирование расчета дохода поставщика от трех продуктов
+     * <p>Ожидается, что доход будет верно посчитан: 500 + 700 + 1000 = 2200</p>
      */
     @Test
-    void testCalculateIncomeSupplier_onlyBoughtProducts() {
+    void testCalculateIncomeSupplierWithBoughtProducts() {
         Product soldProduct1 = new Product();
         soldProduct1.setSupplierCost(500);
 
@@ -80,10 +83,10 @@ class IncomeServiceImplTest {
 
     /**
      * Тестирование расчета дохода поставщика без продуктов
-     * Доход - 0
+     * <p>Доход - 0</p>
      */
     @Test
-    void testCalculateIncomeSupplier_emptyProducts() {
+    void testCalculateIncomeSupplierWithEmptyProducts() {
         int income = incomeService.calculateIncomeSupplier(List.of());
 
         Assertions.assertEquals(0, income);

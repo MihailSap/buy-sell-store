@@ -21,6 +21,11 @@ public enum Period {
     LAST_MONTH,
 
     /**
+     * Последний год
+     */
+    LAST_YEAR,
+
+    /**
      * Все время
      */
     ALL
