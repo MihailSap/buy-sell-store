@@ -1,6 +1,7 @@
 package ru.project.buySellStore.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,7 @@ public class ProductController {
      * @param productService - сервис Товара
      * @param productMapper - маппер Товара
      */
+    @Autowired
     public ProductController(ProductService productService, ProductMapper productMapper, AuthService authService, UserServiceImpl userService) {
         this.productService = productService;
         this.productMapper = productMapper;

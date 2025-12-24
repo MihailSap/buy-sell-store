@@ -6,10 +6,14 @@ import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.productEx.ProductArchiveException;
 import ru.project.buySellStore.exception.productEx.ProductNotFoundException;
 import ru.project.buySellStore.exception.productEx.ProductRestoreException;
+import ru.project.buySellStore.model.DateRange;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 import ru.project.buySellStore.repository.ProductRepository;
 import ru.project.buySellStore.service.ProductService;
+
+import java.time.LocalDate;
+
 import java.util.List;
 
 /**
@@ -124,8 +128,48 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product.setBuyer(buyer);
+        product.setBoughtDate(LocalDate.now());
 
         productRepository.save(product);
+    }
+
+    @Override
+    public List<Product> findBySellerAndCategoryAndBoughtDateBetween(
+            String category, User seller, DateRange dateRange) {
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
+
+        if (category.equals("ALL")) {
+            return productRepository.findBySellerAndBoughtDateBetween(seller, startDate, endDate);
+        }
+        return productRepository.findBySellerAndCategoryAndBoughtDateBetween(
+                seller, category, startDate, endDate);
+    }
+
+    @Override
+    public List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
+            String category, User supplier, DateRange dateRange) {
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
+
+        if (category.equals("ALL")) {
+            return productRepository.findBySupplierAndBoughtDateBetween(supplier, startDate, endDate);
+        }
+        return productRepository.findBySupplierAndCategoryAndBoughtDateBetween(
+                supplier, category, startDate, endDate);
+    }
+
+    @Override
+    public List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
+            String category, User buyer, DateRange dateRange){
+        LocalDate startDate = dateRange.getStartDate();
+        LocalDate endDate = dateRange.getEndDate();
+
+        if (category.equals("ALL")) {
+            return productRepository.findByBuyerAndBoughtDateBetween(buyer, startDate, endDate);
+        }
+        return productRepository.findByBuyerAndCategoryAndBoughtDateBetween(
+                buyer, category, startDate, endDate);
     }
 
     /**

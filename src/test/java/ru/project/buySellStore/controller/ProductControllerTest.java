@@ -207,7 +207,8 @@ class ProductControllerTest {
     void testFindNonExistingProductById() throws Exception {
         Long productId = 1L;
 
-        Mockito.when(authService.getAuthenticatedUser()).thenReturn(buyerUser);
+        Mockito.when(authService.getAuthenticatedUser())
+                .thenReturn(buyerUser);
 
         Mockito.when(productService.findById(productId, buyerUser))
                 .thenThrow(new ProductNotFoundException(productId));

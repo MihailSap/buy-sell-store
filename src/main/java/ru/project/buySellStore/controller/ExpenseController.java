@@ -1,0 +1,73 @@
+package ru.project.buySellStore.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.project.buySellStore.dto.ReportDTO;
+import ru.project.buySellStore.mapper.PeriodMapper;
+import ru.project.buySellStore.model.Product;
+import ru.project.buySellStore.model.Role;
+import ru.project.buySellStore.model.User;
+import ru.project.buySellStore.service.AuthService;
+import ru.project.buySellStore.service.ExpenseService;
+import ru.project.buySellStore.service.ProductService;
+
+import java.util.List;
+
+/**
+ * Контроллер для просмотра расходов
+ */
+@RestController
+@RequestMapping("/api/expense")
+public class ExpenseController {
+
+    private final ProductService productService;
+
+    private final ExpenseService expenseService;
+
+    private final AuthService authServiceImpl;
+
+    private final PeriodMapper periodMapper;
+
+    /**
+     * Создание контроллера для просмотра расходов с внедрением нужных зависимостей
+     */
+    @Autowired
+    public ExpenseController(
+            ProductService productService,
+            ExpenseService expenseService,
+            AuthService authServiceImpl,
+            PeriodMapper periodMapper
+    ) {
+        this.productService = productService;
+        this.expenseService = expenseService;
+        this.authServiceImpl = authServiceImpl;
+        this.periodMapper = periodMapper;
+    }
+
+    /**
+     * Получение расходов покупателя
+     */
+    @PostMapping
+    public String getExpense(@RequestBody ReportDTO reportDTO){
+        User user = authServiceImpl.getAuthenticatedUser();
+
+        if (!user.getRole().equals(Role.BUYER)) {
+            throw new AccessDeniedException("Только покупатель может узнать аналитику расходов!");
+        }
+
+        List<Product> products = productService.
+                findByBuyerAndCategoryAndBoughtDateBetween(
+                        reportDTO.getCategory(),
+                        user,
+                        periodMapper.mapPeriodToDateRange(reportDTO.getPeriod())
+                );
+        int income = expenseService.getExpense(products);
+        String period = periodMapper.getPeriodDescription(reportDTO.getPeriod());
+        return String.format("%s вы потратили %s на товарах в категории %s",
+                period, income, reportDTO.getCategory());
+    }
+}

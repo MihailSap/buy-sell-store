@@ -1,10 +1,8 @@
 package ru.project.buySellStore.service;
 
-import ru.project.buySellStore.dto.ProductDTO;
-import ru.project.buySellStore.dto.ProductSellerUpdateDTO;
-import ru.project.buySellStore.dto.ProductSupplierUpdateDTO;
 import ru.project.buySellStore.exception.productEx.*;
 import ru.project.buySellStore.exception.userEx.UserNotSuitableRoleException;
+import ru.project.buySellStore.model.DateRange;
 import ru.project.buySellStore.model.Product;
 import ru.project.buySellStore.model.User;
 
@@ -62,4 +60,25 @@ public interface ProductService {
      */
     void buyProduct(Long productId, User buyer)
       throws ProductArchiveException, ProductWithoutSellerException, ProductAlreadyBoughtException, ProductNotFoundException;
+
+    /**
+     * Получить товары по продавцу, категории и временному промежутку
+     * <p>Если категория - ALL, то получение товаров выполняется по продавцу и дате продажи</p>
+     */
+    List<Product> findBySellerAndCategoryAndBoughtDateBetween(
+            String category, User seller, DateRange dateRange);
+
+    /**
+     * Получить товары по поставщику, категории и временному промежутку
+     * <p>Если категория - ALL, то получение товаров выполняется по продавцу и дате продажи</p>
+     */
+    List<Product> findBySupplierAndCategoryAndBoughtDateBetween(
+            String category, User supplier, DateRange dateRange);
+
+    /**
+     * Получить товары по покупателю, категории и временному промежутку
+     * <p>Если категория - ALL, то получение товаров выполняется только по покупателю и дате покупки</p>
+     */
+    List<Product> findByBuyerAndCategoryAndBoughtDateBetween(
+            String category, User buyer, DateRange dateRange);
 }
