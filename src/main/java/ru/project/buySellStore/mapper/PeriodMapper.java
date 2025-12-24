@@ -20,6 +20,7 @@ public class PeriodMapper {
             case Period.TODAY -> "За сегодня";
             case Period.LAST_WEEK -> "За последнюю неделю";
             case Period.LAST_MONTH -> "За последний месяц";
+            case Period.LAST_YEAR -> "За последний год";
             case Period.ALL -> "За все время";
         };
     }
@@ -33,6 +34,7 @@ public class PeriodMapper {
             case Period.TODAY -> endDate;
             case Period.LAST_WEEK -> endDate.minusWeeks(1);
             case Period.LAST_MONTH -> endDate.minusMonths(1);
+            case Period.LAST_YEAR -> endDate.minusYears(1);
             case Period.ALL -> LocalDate.of(1970, 1, 1);
         };
         return new DateRange(startDate, endDate);

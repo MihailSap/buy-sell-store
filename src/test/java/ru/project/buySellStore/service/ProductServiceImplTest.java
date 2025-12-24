@@ -481,7 +481,11 @@ class ProductServiceImplTest {
                 "ALL", seller, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findBySellerAndBoughtDateBetween(seller, start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findBySellerAndCategoryAndBoughtDateBetween(
+                        Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -502,8 +506,11 @@ class ProductServiceImplTest {
                 "Electronics", seller, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findBySellerAndCategoryAndBoughtDateBetween(
                 seller, "Electronics", start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findBySellerAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -523,7 +530,11 @@ class ProductServiceImplTest {
                 "ALL", supplier, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findBySupplierAndBoughtDateBetween(supplier, start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findBySupplierAndCategoryAndBoughtDateBetween(
+                        Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -544,8 +555,11 @@ class ProductServiceImplTest {
                 "Electronics", supplier, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findBySupplierAndCategoryAndBoughtDateBetween(
                 supplier, "Electronics", start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findBySupplierAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -565,7 +579,11 @@ class ProductServiceImplTest {
                 "ALL", buyer, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findByBuyerAndBoughtDateBetween(buyer, start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findByBuyerAndCategoryAndBoughtDateBetween(
+                        Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -586,7 +604,10 @@ class ProductServiceImplTest {
                 "Electronics", buyer, new DateRange(start, end));
 
         Assertions.assertEquals(products, result);
+
         Mockito.verify(productRepository).findByBuyerAndCategoryAndBoughtDateBetween(
                 buyer, "Electronics", start, end);
+        Mockito.verify(productRepository, Mockito.never())
+                .findByBuyerAndBoughtDateBetween(Mockito.any(), Mockito.any(), Mockito.any());
     }
 }

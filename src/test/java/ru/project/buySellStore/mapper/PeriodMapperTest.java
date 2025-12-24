@@ -31,6 +31,7 @@ public class PeriodMapperTest {
         Assertions.assertEquals("За сегодня", periodMapper.getPeriodDescription(Period.TODAY));
         Assertions.assertEquals("За последнюю неделю", periodMapper.getPeriodDescription(Period.LAST_WEEK));
         Assertions.assertEquals("За последний месяц", periodMapper.getPeriodDescription(Period.LAST_MONTH));
+        Assertions.assertEquals("За последний год", periodMapper.getPeriodDescription(Period.LAST_YEAR));
         Assertions.assertEquals("За все время", periodMapper.getPeriodDescription(Period.ALL));
     }
 
@@ -64,6 +65,17 @@ public class PeriodMapperTest {
         LocalDate now = LocalDate.now();
         DateRange result = periodMapper.mapPeriodToDateRange(Period.LAST_MONTH);
         Assertions.assertEquals(now.minusMonths(1), result.getStartDate());
+        Assertions.assertEquals(now, result.getEndDate());
+    }
+
+    /**
+     * Проверяется корректность преобразования периода {@link Period#LAST_YEAR} в диапазон дат
+     */
+    @Test
+    void testMapLastYearPeriodToDateRange() {
+        LocalDate now = LocalDate.now();
+        DateRange result = periodMapper.mapPeriodToDateRange(Period.LAST_YEAR);
+        Assertions.assertEquals(now.minusYears(1), result.getStartDate());
         Assertions.assertEquals(now, result.getEndDate());
     }
 
